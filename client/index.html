@@ -1,0 +1,51 @@
+<html>
+
+<head> </head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<body>
+  <script type="text/javascript">
+    var sock = null;
+    var wsuri = 'ws://127.0.0.1:3001';
+
+    window.onload = function () {
+      console.log('onload');
+
+      sock = new WebSocket(wsuri);
+
+      sock.onopen = function () {
+        sock.send(
+          JSON.stringify({
+            token: 'EvDePcduBn0h7YUSVxbgLp8eafA=',
+            id: 1,
+            action: 'onload'
+          })
+        );
+      };
+
+      sock.onclose = function (e) {
+        console.log('connection closed (' + e.code + ')');
+      };
+
+      sock.onmessage = function (e) {
+        console.log('message received: ' + e.data);
+      };
+    };
+
+    function send() {
+      sock.send(
+        JSON.stringify({
+          action: 'send',
+          message: document.getElementById('message').value
+        })
+      );
+    }
+  </script>
+  <h1>WebSocket Echo Test</h1>
+  <form>
+    <p>Message: <input id="message" type="text" value="Hello, world!" /></p>
+  </form>
+  <button onclick="send();">Send Message</button>
+</body>
+
+</html>

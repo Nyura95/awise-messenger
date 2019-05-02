@@ -1,0 +1,37 @@
+CREATE TABLE tbl_conversations (
+	id_conversation int(5) NOT NULL auto_increment,
+	uniq_hash varchar(255) NOT null,
+	token varchar(255) NOT NULL,
+	title varchar(255) NOT NULL,
+	id_creator int(5) NOT null,
+	id_receiver int(5) NOT null,
+	id_last_message int(5),
+	id_first_message int(5),
+	id_status int(5) NOT NULL,
+	created_at TIMESTAMP,
+	updated_at TIMESTAMP,
+	PRIMARY key(id_conversation)
+);
+
+CREATE TABLE tbl_messages (
+	id_message int(5) NOT NULL auto_increment,
+	id_user int(5) NOT NULL,
+	id_conversation int(5) NOT NULL,
+	message varchar(255),
+	id_status int(5) NOT NULL,
+	created_at DATETIME,
+	updated_at DATETIME,
+	PRIMARY key(id_message)
+);
+
+CREATE TABLE lbl_status_messenger (
+	id_status int(5) NOT NULL auto_increment,
+	lockey varchar(255) NOT NULL,
+	label varchar(255) NOT NULL,
+	created_at DATETIME,
+	updated_at DATETIME,
+	PRIMARY key(id_status)
+);
+
+INSERT INTO lbl_status_messenger(lockey, label, created_at, updated_at) VALUES('pending', 'En attente', NOW(), NOW());
+INSERT INTO lbl_status_messenger(lockey, label, created_at, updated_at) VALUES('read', 'Lu', NOW(), NOW());
