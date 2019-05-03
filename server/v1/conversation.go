@@ -78,7 +78,6 @@ func GetAllConvo(w http.ResponseWriter, r *http.Request) {
 		allConversation = append(allConversation, listConversations{Message: message, Conversation: conv, Target: <-userTarget, NotRead: len(messagesNotRead)})
 	}
 
-	log.Println("Sort")
 	// Sort the array on the update_at in the last message
 	sort.Sort(allConversation)
 
