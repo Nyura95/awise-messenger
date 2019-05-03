@@ -1,9 +1,9 @@
 package models
 
 import (
+	"awise-messenger/config"
 	"database/sql"
 	"log"
-	"messenger/config"
 
 	// import sql
 	_ "github.com/go-sql-driver/mysql"

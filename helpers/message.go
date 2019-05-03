@@ -1,6 +1,6 @@
 package helpers
 
-import "messenger/models"
+import "awise-messenger/models"
 
 // CountMessageNotReadByIDUser  count the row by iduser and idstatus 1
 func CountMessageNotReadByIDUser(IDUser int, messages []*models.Message) int {

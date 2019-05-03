@@ -1,6 +1,6 @@
 package helpers
 
-import "messenger/models"
+import "awise-messenger/models"
 
 // GetUser chan
 func GetUser(userID int, user chan models.User) {

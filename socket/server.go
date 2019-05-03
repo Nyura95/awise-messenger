@@ -1,9 +1,9 @@
 package socket
 
 import (
+	"awise-messenger/config"
+	"awise-messenger/models"
 	"log"
-	"messenger/config"
-	"messenger/models"
 	"net/http"
 	"strconv"
 

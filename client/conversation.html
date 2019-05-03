@@ -1,31 +1,48 @@
 <html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+  </head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-<head> </head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-<body>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-12" id="listConversation"></div>
+      </div>
+    </div>
+  </body>
   <script type="text/javascript">
     $.ajax({
       type: 'GET',
-      url: 'http://127.0.0.1:3000/api/v1/conversation/18',
+      url: 'http://127.0.0.1:3000/api/v1/conversation',
       headers: {
         Authorization:
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZm5hbWUiOiJHdXkiLCJsbmFtZSI6ImRldXgiLCJlbWFpbCI6Imd1aWRlQHFxLnFxIiwiaWF0IjoxNTQzNzA1NzE2LCJleHAiOjE1NDM3MDkzMTZ9.QDI4X9BijMakbCIT88jY4G9sAv8fpeuATdYfJ8n29P4',
-        "Content-type": "application/json"
+        'Content-type': 'application/json',
       },
       dataType: 'json',
-      success: function (result) {
-        console.log(result);
-        $('#name').html(result.Data.Conversation.Title);
-        $('#nbMessage').html(result.Data.Messages.length);
+      success: function(response) {
+        console.log(response);
+        for (let i = 0; i < response.Data.length; i++) {
+          const conversation = response.Data[i];
+          $('#listConversation').append(`<div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${conversation.Title}</h5>
+              <textarea style="width:100%;min-height:250px">${JSON.stringify(
+                conversation
+              ).replace(',', ',' + String.fromCharCode(13, 10))}</textarea>
+            </div>
+          </div>`);
+        }
       },
-      error: function (err) {
+      error: function(err) {
         console.log(err);
-      }
+      },
     });
   </script>
-  <h1>Api test</h1>
-  Conversation : <span id="name"></span> Nombre de message : <span id="nbMessage"></span>
-</body>
-
 </html>

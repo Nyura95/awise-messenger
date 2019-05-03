@@ -1,10 +1,10 @@
 package main
 
 import (
-	"messenger/config"
-	"messenger/models"
-	"messenger/server"
-	"messenger/socket"
+	"awise-messenger/config"
+	"awise-messenger/models"
+	"awise-messenger/server"
+	"awise-messenger/socket"
 )
 
 func main() {

@@ -1,11 +1,11 @@
 package v1
 
 import (
+	"awise-messenger/helpers"
+	"awise-messenger/models"
+	"awise-messenger/server/response"
 	"encoding/json"
 	"log"
-	"messenger/helpers"
-	"messenger/models"
-	"messenger/server/response"
 	"net/http"
 	"sort"
 
@@ -27,10 +27,11 @@ func (p allConversations) Len() int {
 }
 
 func (p allConversations) Less(i, j int) bool {
-	return p[i].Message.UpdatedAt.Before(p[i].Message.UpdatedAt)
+	return p[i].Message.UpdatedAt.After(p[j].Message.UpdatedAt)
 }
 
 func (p allConversations) Swap(i, j int) {
+
 	p[i], p[j] = p[j], p[i]
 }
 
@@ -77,10 +78,11 @@ func GetAllConvo(w http.ResponseWriter, r *http.Request) {
 		allConversation = append(allConversation, listConversations{Message: message, Conversation: conv, Target: <-userTarget, NotRead: len(messagesNotRead)})
 	}
 
+	log.Println("Sort")
 	// Sort the array on the update_at in the last message
 	sort.Sort(allConversation)
 
-	log.Println("Return conversation ")
+	log.Println("Return conversatio")
 	json.NewEncoder(w).Encode(response.BasicResponse(allConversation, "ok", 1))
 }
 

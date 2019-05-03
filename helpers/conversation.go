@@ -1,9 +1,9 @@
 package helpers
 
 import (
+	"awise-messenger/models"
 	"crypto/sha1"
 	"encoding/base64"
-	"messenger/models"
 	"strconv"
 )
 

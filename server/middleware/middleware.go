@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"awise-messenger/models"
 	"log"
-	"messenger/models"
 	"net/http"
 
 	"github.com/gorilla/context"

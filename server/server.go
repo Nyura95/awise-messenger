@@ -1,10 +1,10 @@
 package server
 
 import (
+	"awise-messenger/config"
+	"awise-messenger/server/middleware"
+	v1 "awise-messenger/server/v1"
 	"log"
-	"messenger/config"
-	"messenger/server/middleware"
-	v1 "messenger/server/v1"
 	"net/http"
 	"strconv"
 

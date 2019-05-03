@@ -1,10 +1,10 @@
 package v1
 
 import (
+	"awise-messenger/models"
+	"awise-messenger/server/response"
 	"encoding/json"
 	"log"
-	"messenger/models"
-	"messenger/server/response"
 	"net/http"
 
 	"github.com/gorilla/context"
