@@ -36,7 +36,7 @@ func (message *Message) FindLastMessageSendByIDConversation() error {
 // FindAllMessageByIDConversation from tbl_message
 func FindAllMessageByIDConversation(idConversation int) ([]*Message, error) {
 	messages := make([]*Message, 0)
-	rows, err := db.Query("SELECT * FROM tbl_messages WHERE id_conversation = ? ORDER BY id_message DESC", idConversation)
+	rows, err := db.Query("SELECT * FROM tbl_messages WHERE id_conversation = ? ORDER BY id_message ASC", idConversation)
 	if err != nil {
 		return messages, err
 	}
@@ -59,7 +59,7 @@ func FindAllMessageByIDConversation(idConversation int) ([]*Message, error) {
 // FindAllMessageNotRead from tbl_message
 func FindAllMessageNotRead(idConversation int, IDUser int) ([]*Message, error) {
 	messages := make([]*Message, 0)
-	rows, err := db.Query("SELECT * FROM tbl_messages WHERE id_conversation = ? AND id_status = 1 and id_user = ? ORDER BY id_message DESC", idConversation, IDUser)
+	rows, err := db.Query("SELECT * FROM tbl_messages WHERE id_conversation = ? AND id_status = 1 and id_user = ? ORDER BY id_message ASC", idConversation, IDUser)
 	if err != nil {
 		return messages, err
 	}
