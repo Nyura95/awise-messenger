@@ -31,7 +31,6 @@ func (p allConversations) Less(i, j int) bool {
 }
 
 func (p allConversations) Swap(i, j int) {
-
 	p[i], p[j] = p[j], p[i]
 }
 
@@ -104,6 +103,8 @@ func GetConvo(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
 		return
 	}
+
+	// check if userTarget exist in base
 
 	// Seek users in goroutine
 	user := make(chan models.User)

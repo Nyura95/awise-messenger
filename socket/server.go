@@ -23,6 +23,7 @@ func handler(ws *websocket.Conn) {
 	var err error
 
 	customer := Customer{Ws: ws}
+	log.Println("New")
 
 	for {
 		var transactionnal Transactionnal
