@@ -50,7 +50,7 @@ func handler(ws *websocket.Conn) {
 			log.Println("onread")
 
 			// Research conversation by token
-			conversation := models.Conversation{Token: customer.Info.Token}
+			conversation := models.Conversation{TokenCreator: customer.Info.Token, TokenReceiver: customer.Info.Token}
 			conversation.FindOneByToken()
 
 			var idTarget int
@@ -74,7 +74,7 @@ func handler(ws *websocket.Conn) {
 			log.Println("send")
 
 			// Research conversation
-			conversation := models.Conversation{Token: customer.Info.Token}
+			conversation := models.Conversation{TokenCreator: customer.Info.Token, TokenReceiver: customer.Info.Token}
 			if err = conversation.FindOneByToken(); err != nil {
 				customer.sendMessage(Transactionnal{Action: "Error", ID: customer.Info.ID, Message: "Conversation lost", Token: customer.Info.Token})
 				break

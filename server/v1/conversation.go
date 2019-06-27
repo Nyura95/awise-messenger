@@ -84,8 +84,8 @@ func GetAllConvo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response.BasicResponse(allConversation, "ok", 1))
 }
 
-// GetConvo for get or create a conversation with uniq_id
-func GetConvo(w http.ResponseWriter, r *http.Request) {
+// GetConvoByTarget for get or create a conversation with uniq_id
+func GetConvoByTarget(w http.ResponseWriter, r *http.Request) {
 	log.Println("Get a conversation !")
 	// Get ID token
 	idUser := context.Get(r, "user_id").(int)
@@ -104,7 +104,13 @@ func GetConvo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check if userTarget exist in base
+	// check if the target exist in database
+	userTarget := models.User{UserID: idTarget}
+	if userTarget.FindOne() != nil {
+		log.Printf("User target not found ! (%d)", idTarget)
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "User target not found", -3))
+		return
+	}
 
 	// Seek users in goroutine
 	user := make(chan models.User)
@@ -123,7 +129,8 @@ func GetConvo(w http.ResponseWriter, r *http.Request) {
 		log.Println("Conversation is not find, creation in progress ...")
 		// Default value
 		conversation.Title = "Title"
-		conversation.Token = helpers.Token(uniqHash)
+		conversation.TokenCreator = helpers.Token(uniqHash + "creator")
+		conversation.TokenReceiver = helpers.Token(uniqHash + "receiver")
 		conversation.IDCreator = idUser
 		conversation.IDReceiver = idTarget
 		conversation.IDStatus = 1
@@ -142,6 +149,53 @@ func GetConvo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("Conversation find (%v)", conversation.IDConversation)
+	// Seek all messages
+	messages, _ := models.FindAllMessageByIDConversation(conversation.IDConversation)
+
+	// Count message not read
+	messagesNotRead, _ := models.FindAllMessageNotRead(conversation.IDConversation, idTarget)
+
+	log.Println("Return conversation")
+	// return response
+	json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: conversation, Messages: messages, User: <-user, Target: <-target, NotRead: len(messagesNotRead)}, "ok", 1))
+}
+
+// GetConvoByID for get a conversation by id
+func GetConvoByID(w http.ResponseWriter, r *http.Request) {
+	log.Println("Get a conversation !")
+	// Get ID token
+	idUser := context.Get(r, "user_id").(int)
+
+	// Get id target from the params
+	idConversation, err := helpers.StringToInt(mux.Vars(r)["id"])
+	if idConversation == 0 || err != nil {
+		log.Printf("The params is wrong ! %s", mux.Vars(r))
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Body is wrong (params)", -1))
+		return
+	}
+
+	// find conv with the hash_uniq
+	conversation := models.Conversation{IDConversation: idConversation}
+	if err = conversation.FindOne(); err != nil {
+		log.Printf("The conversation does not exist ! %d", idConversation)
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The conversation does not exist !", -2))
+		return
+	}
+	log.Printf("Conversation find (%v)", conversation.IDConversation)
+
+	idTarget := 0
+	if conversation.IDCreator == idUser {
+		idTarget = conversation.IDReceiver
+	} else {
+		idTarget = conversation.IDCreator
+	}
+
+	// Seek users in goroutine
+	user := make(chan models.User)
+	target := make(chan models.User)
+	go helpers.GetUser(idUser, user)
+	go helpers.GetUser(idTarget, target)
+
 	// Seek all messages
 	messages, _ := models.FindAllMessageByIDConversation(conversation.IDConversation)
 

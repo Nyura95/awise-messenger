@@ -28,7 +28,9 @@ func Start() {
 	r.Use(middleware.IsGoodToken)
 
 	// Get or Create a conversation with one target
-	r.HandleFunc("/api/v1/conversation/{id}", v1.GetConvo).Methods("GET")
+	r.HandleFunc("/api/v1/conversation/target/{id}", v1.GetConvoByTarget).Methods("GET")
+	// Get or Create a conversation with one target
+	r.HandleFunc("/api/v1/conversation/{id}", v1.GetConvoByID).Methods("GET")
 	// Get all conversation for the user
 	r.HandleFunc("/api/v1/conversation", v1.GetAllConvo).Methods("GET")
 	// Get info user

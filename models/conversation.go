@@ -9,10 +9,11 @@ import (
 type Conversation struct {
 	IDConversation int
 	UniqHash       string
-	Token          string
 	Title          string
 	IDCreator      int
+	TokenCreator   string
 	IDReceiver     int
+	TokenReceiver  string
 	IDLastMessage  int
 	IDFirstMessage int
 	IDStatus       int
@@ -31,7 +32,7 @@ func FindAllConversationByIDUser(IDUser int) ([]*Conversation, error) {
 
 	for rows.Next() {
 		conversation := new(Conversation)
-		err := rows.Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Token, &conversation.Title, &conversation.IDCreator, &conversation.IDReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+		err := rows.Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Title, &conversation.IDCreator, &conversation.TokenCreator, &conversation.IDReceiver, &conversation.TokenReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
 		if err != nil {
 			return conversations, err
 		}
@@ -45,7 +46,7 @@ func FindAllConversationByIDUser(IDUser int) ([]*Conversation, error) {
 
 // FindOne a conversation
 func (conversation *Conversation) FindOne() error {
-	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE id_conversation = ? LIMIT 1", conversation.IDConversation).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Token, &conversation.Title, &conversation.IDCreator, &conversation.IDReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE id_conversation = ? LIMIT 1", conversation.IDConversation).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Title, &conversation.IDCreator, &conversation.TokenCreator, &conversation.IDReceiver, &conversation.TokenReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (conversation *Conversation) FindOne() error {
 
 // FindOneByHash a conversation
 func (conversation *Conversation) FindOneByHash() error {
-	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE uniq_hash = ? LIMIT 1", conversation.UniqHash).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Token, &conversation.Title, &conversation.IDCreator, &conversation.IDReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE uniq_hash = ? LIMIT 1", conversation.UniqHash).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Title, &conversation.IDCreator, &conversation.TokenCreator, &conversation.IDReceiver, &conversation.TokenReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -65,7 +66,7 @@ func (conversation *Conversation) FindOneByHash() error {
 
 // FindOneByToken a conversationn
 func (conversation *Conversation) FindOneByToken() error {
-	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE token = ? LIMIT 1", conversation.Token).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Token, &conversation.Title, &conversation.IDCreator, &conversation.IDReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE token_creator = ? OR token_receiver = ? LIMIT 1", conversation.TokenCreator, conversation.TokenReceiver).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Title, &conversation.IDCreator, &conversation.TokenCreator, &conversation.IDReceiver, &conversation.TokenReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -75,8 +76,9 @@ func (conversation *Conversation) FindOneByToken() error {
 
 // Create the conversation
 func (conversation *Conversation) Create() error {
-	insert, err := db.Exec("INSERT INTO tbl_conversations(uniq_hash, token, title, id_creator, id_receiver, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", conversation.UniqHash, conversation.Token, conversation.Title, conversation.IDCreator, conversation.IDReceiver, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.Now(), time.Now())
+	insert, err := db.Exec("INSERT INTO tbl_conversations(uniq_hash, title, id_creator, token_creator, id_receiver, token_receiver, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", conversation.UniqHash, conversation.Title, conversation.IDCreator, conversation.TokenCreator, conversation.IDReceiver, conversation.TokenReceiver, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.Now(), time.Now())
 	if err != nil {
+		log.Panicln(err)
 		return err
 	}
 
