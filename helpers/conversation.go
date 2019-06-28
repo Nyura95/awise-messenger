@@ -5,7 +5,29 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"strconv"
+	"time"
 )
+
+// ConversationFront conversation only front
+type ConversationFront struct {
+	IDConversation int
+	Title          string
+	IDuser         int
+	Token          string
+	IDLastMessage  int
+	IDFirstMessage int
+	IDStatus       int
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+// TransformConversationInFront conversation to conversationFront
+func TransformConversationInFront(conversation *models.Conversation, userID int) ConversationFront {
+	if conversation.IDCreator == userID {
+		return ConversationFront{IDConversation: conversation.IDConversation, Title: conversation.Title, IDuser: conversation.IDCreator, Token: conversation.TokenCreator, IDStatus: conversation.IDStatus, IDFirstMessage: conversation.IDFirstMessage, IDLastMessage: conversation.IDLastMessage, CreatedAt: conversation.CreatedAt, UpdatedAt: conversation.UpdatedAt}
+	}
+	return ConversationFront{IDConversation: conversation.IDConversation, Title: conversation.Title, IDuser: conversation.IDReceiver, Token: conversation.TokenReceiver, IDStatus: conversation.IDStatus, IDFirstMessage: conversation.IDFirstMessage, IDLastMessage: conversation.IDLastMessage, CreatedAt: conversation.CreatedAt, UpdatedAt: conversation.UpdatedAt}
+}
 
 // Uniqhash for get the uniq_hash conversation
 func Uniqhash(creator int, receiver int) string {

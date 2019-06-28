@@ -2,7 +2,7 @@ package socket
 
 import (
 	"awise-messenger/config"
-	"awise-messenger/models"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,9 +14,9 @@ import (
 // Transactionnal return
 type Transactionnal struct {
 	Action  string
-	Message string
-	ID      int
-	Token   string
+	Success bool
+	Comment string
+	Data    string
 }
 
 func handler(ws *websocket.Conn) {
@@ -28,79 +28,49 @@ func handler(ws *websocket.Conn) {
 	for {
 		var transactionnal Transactionnal
 		if err = decryptMessage(ws, &transactionnal); err != nil {
-			customer.sendMessage(Transactionnal{Action: "Error", Message: "Error parsing"})
+			customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error parsing", Success: false})
 			break
 		}
 
+		log.Println(transactionnal)
+
 		switch transactionnal.Action {
 		case "onload":
-			log.Println("onload")
-			if exists := getCustomerByID(transactionnal.ID); exists != nil {
-				deleteCustomer(exists)
+			if err := onLoad(transactionnal, &customer); err != nil {
+				log.Printf("Error: %s", err.Error())
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
 			}
-			customer.Info.ID = transactionnal.ID
-			customer.Info.Token = transactionnal.Token
-			Customers = append(Customers, &customer)
 			break
 		case "onclose":
-			log.Println("onclose")
-			deleteCustomer(&customer)
+			if err := onClose(&customer); err != nil {
+				log.Printf("Error: %s", err.Error())
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
+			}
 			return
 		case "onread":
-			log.Println("onread")
-
-			// Research conversation by token
-			conversation := models.Conversation{TokenCreator: customer.Info.Token, TokenReceiver: customer.Info.Token}
-			conversation.FindOneByToken()
-
-			var idTarget int
-			if conversation.IDReceiver == customer.Info.ID {
-				idTarget = conversation.IDCreator
-			} else {
-				idTarget = conversation.IDReceiver
+			if err := onRead(&customer); err != nil {
+				log.Printf("Error: %s", err.Error())
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
 			}
-
-			message := models.Message{IDConversation: conversation.IDConversation, IDUser: idTarget}
-			message.UpdateMessageRead()
-
-			// Update Status
-			if conversation.IDStatus != 2 {
-				conversation.IDStatus = 2
-				conversation.Update()
-			}
-
 			break
 		case "send":
-			log.Println("send")
-
-			// Research conversation
-			conversation := models.Conversation{TokenCreator: customer.Info.Token, TokenReceiver: customer.Info.Token}
-			if err = conversation.FindOneByToken(); err != nil {
-				customer.sendMessage(Transactionnal{Action: "Error", ID: customer.Info.ID, Message: "Conversation lost", Token: customer.Info.Token})
+			newMessage, err := onSend(transactionnal, &customer)
+			if err != nil {
+				log.Printf("Error: %s", err.Error())
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
+				break
+			}
+			data, err := json.Marshal(newMessage)
+			if err != nil {
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error convert message", Success: false})
 				break
 			}
 
-			// Create message
-			message := models.Message{IDUser: customer.Info.ID, IDStatus: 1, IDConversation: conversation.IDConversation, Message: transactionnal.Message}
-			message.Create()
+			customer.sendMessageToCustomer(customer.Info.UserID, Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
+			if target := getCustomerByID(customer.Info.TargetID); target != nil {
+				target.sendMessage(Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
+			}
 
-			// Update status conversation and IDFirst/IDLast
-			conversation.IDStatus = 1
-			conversation.IDLastMessage = message.IDMessage
-			if conversation.IDFirstMessage == 0 {
-				conversation.IDFirstMessage = message.IDMessage
-			}
-			conversation.Update()
-
-			// Send message to target
-			if customer.Info.ID != conversation.IDCreator {
-				customer.sendMessageToCustomer(conversation.IDCreator, Transactionnal{Action: "newMessage", Message: transactionnal.Message})
-				break
-			}
-			if customer.Info.ID != conversation.IDReceiver {
-				customer.sendMessageToCustomer(conversation.IDReceiver, Transactionnal{Action: "newMessage", Message: transactionnal.Message})
-				break
-			}
 			break
 		}
 	}

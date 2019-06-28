@@ -35,7 +35,7 @@ func (p allConversations) Swap(i, j int) {
 }
 
 type oneConversation struct {
-	Conversation models.Conversation
+	Conversation helpers.ConversationFront
 	Messages     []*models.Message
 	User         models.User
 	Target       models.User
@@ -145,7 +145,8 @@ func GetConvoByTarget(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Return conversation")
 		// return response
-		json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: conversation, Messages: make([]*models.Message, 0), User: <-user, Target: <-target}, "ok", 1))
+
+		json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: helpers.TransformConversationInFront(&conversation, idUser), Messages: make([]*models.Message, 0), User: <-user, Target: <-target}, "ok", 1))
 		return
 	}
 	log.Printf("Conversation find (%v)", conversation.IDConversation)
@@ -157,7 +158,7 @@ func GetConvoByTarget(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Return conversation")
 	// return response
-	json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: conversation, Messages: messages, User: <-user, Target: <-target, NotRead: len(messagesNotRead)}, "ok", 1))
+	json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: helpers.TransformConversationInFront(&conversation, idUser), Messages: messages, User: <-user, Target: <-target, NotRead: len(messagesNotRead)}, "ok", 1))
 }
 
 // GetConvoByID for get a conversation by id
@@ -204,5 +205,5 @@ func GetConvoByID(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Return conversation")
 	// return response
-	json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: conversation, Messages: messages, User: <-user, Target: <-target, NotRead: len(messagesNotRead)}, "ok", 1))
+	json.NewEncoder(w).Encode(response.BasicResponse(oneConversation{Conversation: helpers.TransformConversationInFront(&conversation, idUser), Messages: messages, User: <-user, Target: <-target, NotRead: len(messagesNotRead)}, "ok", 1))
 }

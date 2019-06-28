@@ -74,6 +74,26 @@ func (conversation *Conversation) FindOneByToken() error {
 	return nil
 }
 
+// FindOneByTokenCreator a conversationn
+func (conversation *Conversation) FindOneByTokenCreator() error {
+	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE token_creator = ? LIMIT 1", conversation.TokenCreator).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Title, &conversation.IDCreator, &conversation.TokenCreator, &conversation.IDReceiver, &conversation.TokenReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// FindOneByTokenReceiver a conversationn
+func (conversation *Conversation) FindOneByTokenReceiver() error {
+	err := db.QueryRow("SELECT * FROM tbl_conversations WHERE token_receiver = ? LIMIT 1", conversation.TokenReceiver).Scan(&conversation.IDConversation, &conversation.UniqHash, &conversation.Title, &conversation.IDCreator, &conversation.TokenCreator, &conversation.IDReceiver, &conversation.TokenReceiver, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Create the conversation
 func (conversation *Conversation) Create() error {
 	insert, err := db.Exec("INSERT INTO tbl_conversations(uniq_hash, title, id_creator, token_creator, id_receiver, token_receiver, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", conversation.UniqHash, conversation.Title, conversation.IDCreator, conversation.TokenCreator, conversation.IDReceiver, conversation.TokenReceiver, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.Now(), time.Now())

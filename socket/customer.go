@@ -8,8 +8,10 @@ import (
 
 // Info fddsfsdf
 type Info struct {
-	Token string
-	ID    int
+	Token          string
+	UserID         int
+	TargetID       int
+	ConversationID int
 }
 
 // Customer general
@@ -30,7 +32,7 @@ func deleteCustomer(customer *Customer) {
 	}
 
 	for _, n := range Customers {
-		if n.Info.ID != customer.Info.ID {
+		if n.Info.UserID != customer.Info.UserID {
 			q = append(q, n)
 		}
 	}
@@ -39,7 +41,16 @@ func deleteCustomer(customer *Customer) {
 
 func getCustomerByID(id int) *Customer {
 	for _, n := range Customers {
-		if id == n.Info.ID {
+		if id == n.Info.UserID {
+			return n
+		}
+	}
+	return nil
+}
+
+func getCustomerByToken(token string) *Customer {
+	for _, n := range Customers {
+		if token == n.Info.Token {
 			return n
 		}
 	}
