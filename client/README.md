@@ -3,12 +3,14 @@
 ```tsx
 import { AwiseSocket } from './awiseSocket';
 
-const awiseSocket = new AwiseSocket('ws://127.0.0.1:3001');
-
 const Example: IHook<RouteComponentProps> = () => {
   const [messages, setMessages] = React.useState<IMessage[]>([]);
   const [message, setMessage] = React.useState<string>('');
   const [token, setToken] = React.useState<string>('');
+
+  const awiseSocket = React.useMemo(() => {
+    return new AwiseSocket('ws://127.0.0.1:3001');
+  }, []);
 
   const init = React.useCallback(() => {
     awiseSocket.init().then(() => {
