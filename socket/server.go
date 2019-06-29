@@ -33,6 +33,11 @@ func handler(ws *websocket.Conn) {
 		}
 
 		log.Println(transactionnal)
+		if transactionnal.Action != "onload" && customer.Info.Token == "" {
+			log.Println("Error: You are not initialize")
+			customer.sendMessage(Transactionnal{Action: "Error", Comment: "You are not initialize", Success: false})
+			break
+		}
 
 		switch transactionnal.Action {
 		case "onload":
