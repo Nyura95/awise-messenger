@@ -14,10 +14,10 @@ import (
 )
 
 type listConversations struct {
-	*models.Conversation
-	Message models.Message
-	Target  models.User
-	NotRead int
+	Conversation helpers.ConversationFront
+	Message      models.Message
+	Target       models.User
+	NotRead      int
 }
 
 type allConversations []listConversations
@@ -43,7 +43,7 @@ type oneConversation struct {
 }
 
 // GetAllConvo for the user
-func GetAllConvo(w http.ResponseWriter, r *http.Request) {
+func GetAllConvo(w http.ResponseWriter, r *http.Request) { // tokenreceiver
 	log.Println("Get all conversation !")
 	// Get ID token
 	idUser := context.Get(r, "user_id").(int)
@@ -74,7 +74,7 @@ func GetAllConvo(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("For the conversation %d, message : (%s)", conv.IDConversation, message.Message)
 		// Show the last massage
-		allConversation = append(allConversation, listConversations{Message: message, Conversation: conv, Target: <-userTarget, NotRead: len(messagesNotRead)})
+		allConversation = append(allConversation, listConversations{Message: message, Conversation: helpers.TransformConversationInFront(conv, idUser), Target: <-userTarget, NotRead: len(messagesNotRead)})
 	}
 
 	// Sort the array on the update_at in the last message
