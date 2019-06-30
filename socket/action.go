@@ -130,7 +130,7 @@ func onLoad(transactional Transactionnal, customer *Customer) error {
 	customer.Info.Token = action.Token
 	customer.Info.ConversationID = conversation.IDConversation
 
-	log.Printf("Conversation find customer update (UserID: %d, TargetID: %d, Token: %s, ConversationID: %d", customer.Info.UserID, customer.Info.TargetID, customer.Info.Token, customer.Info.ConversationID)
+	log.Printf("Conversation find customer update (UserID: %d, TargetID: %d, Token: %s, ConversationID: %d)", customer.Info.UserID, customer.Info.TargetID, customer.Info.Token, customer.Info.ConversationID)
 
 	// add customer
 	Customers = append(Customers, customer)

@@ -48,6 +48,7 @@ func GetAllConvo(w http.ResponseWriter, r *http.Request) { // tokenreceiver
 	// Get ID token
 	idUser := context.Get(r, "user_id").(int)
 
+	log.Printf("User ID : %d", idUser)
 	// Get all conversation in relationship with the user
 	conversations, _ := models.FindAllConversationByIDUser(idUser)
 	log.Printf("Conversations found : %d", len(conversations))
@@ -80,7 +81,7 @@ func GetAllConvo(w http.ResponseWriter, r *http.Request) { // tokenreceiver
 	// Sort the array on the update_at in the last message
 	sort.Sort(allConversation)
 
-	log.Println("Return conversatio")
+	log.Println("Return conversation")
 	json.NewEncoder(w).Encode(response.BasicResponse(allConversation, "ok", 1))
 }
 

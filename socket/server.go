@@ -72,7 +72,9 @@ func handler(ws *websocket.Conn) {
 			}
 
 			customer.sendMessageToCustomer(customer.Info.UserID, Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
+			log.Printf("check if target %d is online", customer.Info.TargetID)
 			if target := getCustomerByID(customer.Info.TargetID); target != nil {
+				log.Printf("Target find")
 				target.sendMessage(Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
 			}
 
