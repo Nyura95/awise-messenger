@@ -1,7 +1,7 @@
 <template>
   <div>
     {{ $t('counter', { counter: counter }) }}
-    <button @click.prevent="increment(1)">Increment</button>
+    <button @click.prevent="close()">Increment</button>
   </div>
 </template>
 
@@ -10,28 +10,39 @@ import Socket from "../../plugings/socket";
 
 export default {
   name: "Home",
-  methods: {
-    increment(add) {
-      this.$store.dispatch("counter/increment", add);
-    }
-  },
   mounted: function() {
     this.init();
+  },
+  unmount: function() {
+    this.close();
   },
   data: function() {
     return { socket: null };
   },
   methods: {
-    init: function() {
+    init() {
       this.socket = new Socket("ws://localhost:3001");
+      this.socket.onmessage = this.newMessage;
       this.socket.init(
         function() {
-          this.socket.sendMessage(
-            "onload",
-            JSON.stringify({ token: "dfsdfsf" })
-          ); // init user with token
+          this.socket.toConversation("X8JzNaGnELklxc2qjO0_4VYznfw=");
         }.bind(this)
       );
+    },
+    sendMessage() {
+      this.socket.sendMessage("send");
+    },
+    newMessage(message) {
+      console.log(message);
+      if (message.Action === "close") {
+        this.init();
+      }
+    },
+    increment(add) {
+      this.$store.dispatch("counter/increment", add);
+    },
+    close() {
+      this.socket.close();
     }
   },
   computed: {

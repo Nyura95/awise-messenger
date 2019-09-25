@@ -10,7 +10,7 @@ import (
 func decryptMessage(ws *websocket.Conn, transaction *Transactionnal) error {
 	var message string
 	websocket.Message.Receive(ws, &message)
-	log.Println(message)
+	log.Printf("Message: %s", message)
 	if message == "" {
 		transaction.Action = "onclose"
 		return nil

@@ -19,6 +19,10 @@ type Transactionnal struct {
 	Data    string
 }
 
+type targetConversation struct {
+	ID int
+}
+
 func handler(ws *websocket.Conn) {
 	var err error
 
@@ -28,14 +32,15 @@ func handler(ws *websocket.Conn) {
 	for {
 		var transactionnal Transactionnal
 		if err = decryptMessage(ws, &transactionnal); err != nil {
-			customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error parsing", Success: false})
+			log.Println("Error: Parsing error")
+			customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error parsing", Success: false, Data: "{}"})
 			break
 		}
 
 		log.Println(transactionnal)
 		if transactionnal.Action != "onload" && customer.Info.Token == "" {
 			log.Println("Error: You are not initialize")
-			customer.sendMessage(Transactionnal{Action: "Error", Comment: "You are not initialize", Success: false})
+			customer.sendMessage(Transactionnal{Action: "Error", Comment: "You are not initialize", Success: false, Data: "{}"})
 			break
 		}
 
@@ -43,31 +48,39 @@ func handler(ws *websocket.Conn) {
 		case "onload":
 			if err := onLoad(transactionnal, &customer); err != nil {
 				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
 			}
+			target, err := json.Marshal(targetConversation{ID: customer.Info.ConversationID})
+			if err != nil {
+				log.Printf("Error: %s", err.Error())
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
+				break
+			}
+			customer.sendMessage(Transactionnal{Action: "newTargetConversation", Success: true, Data: string(target)})
 			break
 		case "onclose":
+			customer.sendMessage(Transactionnal{Action: "close", Success: true, Data: "{}"})
 			if err := onClose(&customer); err != nil {
 				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
 			}
 			return
 		case "onread":
 			if err := onRead(&customer); err != nil {
 				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
 			}
 			break
 		case "send":
 			newMessage, err := onSend(transactionnal, &customer)
 			if err != nil {
 				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false})
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
 				break
 			}
 			data, err := json.Marshal(newMessage)
 			if err != nil {
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error convert message", Success: false})
+				customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error convert message", Success: false, Data: "{}"})
 				break
 			}
 
