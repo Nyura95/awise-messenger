@@ -1,3 +1,5 @@
 export default {
-  test: state => state.counter + 1,
+  doubleCount(state) {
+    return state.counter * 2
+  }
 };

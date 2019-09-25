@@ -7,5 +7,5 @@ Vue.use(VueRouter);
 
 export const router = new VueRouter({
   mode: 'history',
-  routes: [{ path: '/', component: Home }],
+  routes: [{ path: '/', name: 'home', component: Home }],
 });

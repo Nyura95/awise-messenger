@@ -1,7 +1,7 @@
 <template>
   <div>
     {{ $t('counter', { counter: counter }) }}
-    <button @click.prevent="close()">increment</button>
+    <button @click.prevent="increment(1)">increment</button>
   </div>
 </template>
 
@@ -28,7 +28,15 @@ export default {
           // this.$store.dispatch("conversation/getConversation", 18);
         }.bind(this)
       );
-      console.log(this.$store);
+
+      this.$store.watch(
+        (state, getters) => getters["counter/doubleCount"],
+        (newValue, oldValue) => {
+          console.log(`Updating from ${oldValue} to ${newValue}`);
+        }
+      );
+      console.log(this.$store.getters["counter/doubleCount"]);
+
       // this.$store.watch(
       //   (state, getters) => {
       //     console.log(getters);
