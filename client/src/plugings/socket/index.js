@@ -36,7 +36,7 @@ function AwiseSocket(uri) {
  * @author Nyura95
  */
 AwiseSocket.prototype.init = function(callback) {
-  if (this.webSocket.readyState === WebSocket.OPEN) {
+  if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
     console.warn('You have already a connexion openned, close this connexion before starting a new one');
     return;
   }

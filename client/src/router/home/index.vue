@@ -1,13 +1,13 @@
 <template>
   <div>
     {{ $t('counter', { counter: counter }) }}
-    <button @click.prevent="close()">Increment</button>
+    <button @click.prevent="close()">increment</button>
   </div>
 </template>
 
 <script>
 import Socket from "../../plugings/socket";
-
+import { fetch } from "../../plugings/request";
 export default {
   name: "Home",
   mounted: function() {
@@ -25,18 +25,25 @@ export default {
       this.socket.onmessage = this.newMessage;
       this.socket.init(
         function() {
-          this.socket.toConversation("X8JzNaGnELklxc2qjO0_4VYznfw=");
+          // this.$store.dispatch("conversation/getConversation", 18);
         }.bind(this)
       );
+      console.log(this.$store);
+      // this.$store.watch(
+      //   (state, getters) => {
+      //     console.log(getters);
+      //     return getters.getConversation;
+      //   },
+      //   (newValue, oldValue) => {
+      //     console.log(`Updating from ${oldValue} to ${newValue}`);
+      //   }
+      // );
     },
     sendMessage() {
       this.socket.sendMessage("send");
     },
     newMessage(message) {
       console.log(message);
-      if (message.Action === "close") {
-        this.init();
-      }
     },
     increment(add) {
       this.$store.dispatch("counter/increment", add);
