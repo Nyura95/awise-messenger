@@ -1,7 +1,20 @@
 <template>
-  <div>
-    {{ $t('counter', { counter: counter }) }}
-    <button @click.prevent="increment(1)">increment</button>
+  <div class="container">
+    <div class="row" v-for="item in messages" :key="item.IDMessage">
+      <div class="col-12">{{ item.Message }}</div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="row">
+          <div class="col-auto">
+            <input type="text" class="form-control" v-model="message" />
+          </div>
+          <div class="col-auto">
+            <div class="btn btn-primary" v-on:click="sendMessage(message)">Envoyer</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -17,7 +30,7 @@ export default {
     this.close();
   },
   data: function() {
-    return { socket: null };
+    return { socket: null, message: "" };
   },
   methods: {
     init() {
@@ -25,33 +38,25 @@ export default {
       this.socket.onmessage = this.newMessage;
       this.socket.init(
         function() {
-          // this.$store.dispatch("conversation/getConversation", 18);
+          this.$store.dispatch("conversation/getConversation", 18);
         }.bind(this)
       );
 
       this.$store.watch(
-        (state, getters) => getters["counter/doubleCount"],
-        (newValue, oldValue) => {
-          console.log(`Updating from ${oldValue} to ${newValue}`);
+        (state, getters) => getters["conversation/getTokenConversation"],
+        newValue => {
+          this.socket.toConversation(newValue);
         }
       );
-      console.log(this.$store.getters["counter/doubleCount"]);
-
-      // this.$store.watch(
-      //   (state, getters) => {
-      //     console.log(getters);
-      //     return getters.getConversation;
-      //   },
-      //   (newValue, oldValue) => {
-      //     console.log(`Updating from ${oldValue} to ${newValue}`);
-      //   }
-      // );
     },
-    sendMessage() {
-      this.socket.sendMessage("send");
+    sendMessage(msg) {
+      this.socket.sendMessage(msg);
     },
     newMessage(message) {
-      console.log(message);
+      if (message.Action === "newMessage") {
+        this.message = "";
+        this.$store.dispatch("conversation/addMessage", message.Data);
+      }
     },
     increment(add) {
       this.$store.dispatch("counter/increment", add);
@@ -61,8 +66,8 @@ export default {
     }
   },
   computed: {
-    counter() {
-      return this.$store.state.counter.counter;
+    messages() {
+      return this.$store.state.conversation.messages;
     }
   }
 };

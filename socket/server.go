@@ -90,7 +90,6 @@ func handler(ws *websocket.Conn) {
 				log.Printf("Target find")
 				target.sendMessage(Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
 			}
-
 			break
 		}
 	}

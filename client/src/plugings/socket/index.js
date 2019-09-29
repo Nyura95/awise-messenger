@@ -50,7 +50,7 @@ AwiseSocket.prototype.init = function(callback) {
     }.bind(this);
     this.webSocket.onmessage = function(event) {
       var reveiveMessage = decryptMessage(event.data);
-      if (reveiveMessage.Action === 'newTargetConversation' && reveiveMessage.Data.id) this._targetConversation = reveiveMessage.Data.id;
+      if (reveiveMessage.Action === 'newTargetConversation' && reveiveMessage.Data.ID) this._targetConversation = reveiveMessage.Data.ID;
       if (reveiveMessage.Action === 'close') this._targetConversation = null;
       this.onmessage ? this.onmessage(reveiveMessage) : null;
     }.bind(this);
@@ -85,11 +85,11 @@ AwiseSocket.prototype.toConversation = function(token) {
  * @author Nyura95
  */
 AwiseSocket.prototype.sendMessage = function(message) {
-  if (!this._targetConversation) {
+  if (!this._targetConversation && typeof this._targetConversation !== 'number') {
     console.warn('You must target a conversation (use toConversation)');
     return;
   }
-  this.webSocket ? this.webSocket.send(encryptMessage({ action: 'send', data: JSON.stringify({ message }) })) : null;
+  this.webSocket ? this.webSocket.send(encryptMessage({ action: 'send', data: { message } })) : null;
 };
 
 /**
@@ -101,7 +101,7 @@ AwiseSocket.prototype.sendMessage = function(message) {
  * @author Nyura95
  */
 AwiseSocket.prototype.readMessage = function() {
-  if (!this._targetConversation) {
+  if (!this._targetConversation && typeof this._targetConversation !== 'number') {
     console.warn('You must target a conversation (use toConversation)');
     return;
   }

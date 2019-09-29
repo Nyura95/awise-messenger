@@ -1,4 +1,4 @@
-import { SET_CONVERSATION } from './mutation-types';
+import { SET_CONVERSATION, ADD_MESSAGE } from './mutation-types';
 
 export default {
   [SET_CONVERSATION](state, payload) {
@@ -6,5 +6,8 @@ export default {
     state.messages = payload.Messages;
     state.target = payload.Target;
     state.user = payload.User;
+  },
+  [ADD_MESSAGE](state, payload) {
+    state.messages = [...state.messages, payload];
   },
 };

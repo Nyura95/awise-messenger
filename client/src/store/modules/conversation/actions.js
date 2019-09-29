@@ -1,4 +1,4 @@
-import { SET_CONVERSATION } from './mutation-types';
+import { SET_CONVERSATION, ADD_MESSAGE } from './mutation-types';
 import { fetch } from '../../../plugings/request';
 
 export const getConversation = ({ commit }, id) => {
@@ -15,6 +15,12 @@ export const getConversation = ({ commit }, id) => {
   });
 };
 
+export const addMessage = ({ commit }, message) => {
+  console.log(message);
+  commit(ADD_MESSAGE, message);
+};
+
 export default {
   getConversation,
+  addMessage,
 };

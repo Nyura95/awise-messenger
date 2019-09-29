@@ -1,3 +1,5 @@
 export default {
-  getConversation: state => state.conversation.Token,
+  getTokenConversation(state) {
+    return state.conversation.Token;
+  },
 };

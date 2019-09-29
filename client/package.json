@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "set NODE_ENV=development &&parcel ./index.html --open --no-cache --no-hmr",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "set NODE_ENV=production &&parcel build ./index.html --out-dir build --detailed-report"
   },
   "author": "",
   "license": "ISC",
