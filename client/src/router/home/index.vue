@@ -1,28 +1,18 @@
 <template>
   <div class="container">
-    <div class="row" v-for="item in messages" :key="item.IDMessage">
-      <div class="col-12">{{ item.Message }}</div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <div class="row">
-          <div class="col-auto">
-            <input type="text" class="form-control" v-model="message" />
-          </div>
-          <div class="col-auto">
-            <div class="btn btn-primary" v-on:click="sendMessage(message)">Envoyer</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Tchat :messages="$store.state.conversation.messages" />
   </div>
 </template>
 
 <script>
+import Tchat from "../../component/tchat/container";
 import Socket from "../../plugings/socket";
 import { fetch } from "../../plugings/request";
 export default {
   name: "Home",
+  components: {
+    Tchat
+  },
   mounted: function() {
     this.init();
   },
@@ -30,7 +20,7 @@ export default {
     this.close();
   },
   data: function() {
-    return { socket: null, message: "" };
+    return { socket: null, message: "", color: "black" };
   },
   methods: {
     init() {
@@ -46,6 +36,7 @@ export default {
         (state, getters) => getters["conversation/getTokenConversation"],
         newValue => {
           this.socket.toConversation(newValue);
+          this.color = "white";
         }
       );
     },
