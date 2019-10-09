@@ -1,7 +1,7 @@
 <template>
   <div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <router-link :to="{ name: 'home' }" class="navbar-brand">Vue 2 Boilerplate</router-link>
+      <router-link :to="{ name: 'home' }" class="navbar-brand">Awise messenger</router-link>
 
       <button class="navbar-toggler" type="button" @click="toggleMenu">
         <span class="navbar-toggler-icon" />
@@ -9,9 +9,13 @@
 
       <div :class="{ show : menuCollapsed}" class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">
-          <router-link :to="{ name: 'home' }" active-class="active" class="nav-item" tag="li">
+          <div class="nav-item" v-for="user in users" :key="user.UserID">
+            <!-- <img :src="user.Avatars" class="avatars" /> -->
+            <Avatar :url="user.Avatars" :online="user.Online" />
+          </div>
+          <!-- <router-link :to="{ name: 'home' }" active-class="active" class="nav-item" tag="li">
             <a class="nav-link">Home</a>
-          </router-link>
+          </router-link>-->
         </ul>
         <span class="navbar-text">
           <a class="btn btn-secondary" href="#" @click.prevent="logout">
@@ -28,12 +32,19 @@
 </template>
 
 <script>
+import Avatar from "../component/avatars";
 export default {
   name: "Layout",
+  components: {
+    Avatar
+  },
   data() {
     return {
       menuCollapsed: false
     };
+  },
+  mounted: function() {
+    this.$store.dispatch("users/getAllUsers");
   },
   methods: {
     logout() {
@@ -41,6 +52,11 @@ export default {
     },
     toggleMenu() {
       this.menuCollapsed = !this.menuCollapsed;
+    }
+  },
+  computed: {
+    users() {
+      return this.$store.state.users.accounts;
     }
   }
 };

@@ -9,6 +9,7 @@ import filter from './modules/filter';
 
 import counter from './modules/counter';
 import conversation from './modules/conversation';
+import users from './modules/users';
 
 const debug = process.env.NODE_ENV !== 'production';
 
@@ -22,6 +23,7 @@ export default new Vuex.Store({
   modules: {
     counter,
     conversation,
+    users,
   },
   strict: debug,
   plugins: [vuexLocalStorage.plugin, createLogger()],

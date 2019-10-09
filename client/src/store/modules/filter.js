@@ -1,9 +1,11 @@
 import { filter as counter } from './counter';
 import { filter as conversation } from './conversation';
+import { filter as users } from './users';
 
 const filters = {
   counter,
   conversation,
+  users,
 };
 
 export default mutation => {

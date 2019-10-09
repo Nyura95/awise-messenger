@@ -35,6 +35,8 @@ func Start() {
 	r.HandleFunc("/api/v1/conversation", v1.GetAllConvo).Methods("GET")
 	// Get info user
 	r.HandleFunc("/api/v1/info", v1.GetInfo).Methods("GET")
+	// Get all users
+	r.HandleFunc("/api/v1/users", v1.GetAllUser).Methods("GET")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")
