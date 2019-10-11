@@ -26,11 +26,32 @@ export default {
   },
   methods: {
     init() {
+      document.cookie = "X-Authorization=" + "dqsdqsdDQSDQS" + "; path=/";
+      var conn = new WebSocket("ws://localhost:3001");
+
+      conn.onopen = () => {
+        conn.send("Bonjour");
+      };
+
+      conn.onclose = function(evt) {
+        // var item = document.createElement("div");
+        // item.innerHTML = "<b>Connection closed.</b>";
+        console.log("close");
+      };
+      conn.onmessage = function(evt) {
+        var messages = evt.data.split("\n");
+        for (var i = 0; i < messages.length; i++) {
+          //  var item = document.createElement("div");
+          // item.innerText = messages[i];
+          console.log(messages[i]);
+        }
+      };
+
       // this.socket = new Socket("ws://localhost:3001");
       // this.socket.onmessage = this.newMessage;
       // this.socket.init(
       //   function() {
-      //     this.$store.dispatch("conversation/getConversation", 18);
+      //     // this.$store.dispatch("conversation/getConversation", 18);
       //   }.bind(this)
       // );
       // this.$store.watch(
@@ -44,6 +65,7 @@ export default {
       // this.socket.sendMessage(msg);
     },
     newMessage(message) {
+      console.log(message);
       // if (message.Action === "newMessage") {
       //   this.message = "";
       //   this.$store.dispatch("conversation/addMessage", message.Data);

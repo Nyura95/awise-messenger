@@ -4,7 +4,7 @@ import (
 	"awise-messenger/config"
 	"awise-messenger/models"
 	"awise-messenger/server"
-	"awise-messenger/socket"
+	socketv2 "awise-messenger/socketV2"
 )
 
 func main() {
@@ -15,5 +15,6 @@ func main() {
 	// Lancement du serveur http
 	go server.Start()
 
-	socket.Start()
+	// socket.Start()
+	socketv2.Start()
 }

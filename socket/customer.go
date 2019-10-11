@@ -23,6 +23,13 @@ type Customer struct {
 // Customers stock all customer online
 var Customers []*Customer
 
+// New create customer
+// func New(ws *websocket.Conn, info Info) Customer {
+// 	customer := Customer{Ws: ws, Info: info}
+// 	Customers = append(Customers, &customer)
+// 	return customer
+// }
+
 func deleteCustomer(customer *Customer) {
 	customer.Ws.Close()
 	q := make([]*Customer, 0)
