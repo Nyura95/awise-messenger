@@ -1,13 +1,19 @@
 package socketv2
 
+// TargetBroadcast for
+type TargetBroadcast struct {
+	client  *Client
+	message []byte
+}
+
 // Hub client
 type Hub struct {
 	clients map[*Client]bool
 
-	broadcast chan []byte
+	broadcast       chan []byte
+	targetBroadcast chan TargetBroadcast
 
-	register chan *Client
-
+	register   chan *Client
 	unregister chan *Client
 }
 
@@ -39,6 +45,10 @@ func (h *Hub) run() {
 					delete(h.clients, client)
 				}
 			}
+			// case targetBroadcast := <-h.targetBroadcast:
+			// 	for client := range h.clients {
+
+			// 	}
 		}
 	}
 }

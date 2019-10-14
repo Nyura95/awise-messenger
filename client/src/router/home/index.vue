@@ -30,7 +30,7 @@ export default {
       var conn = new WebSocket("ws://localhost:3001");
 
       conn.onopen = () => {
-        conn.send("Bonjour");
+        conn.send("target{1234}");
       };
 
       conn.onclose = function(evt) {

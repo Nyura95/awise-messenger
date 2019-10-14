@@ -2,15 +2,12 @@ package socketv2
 
 import (
 	"awise-messenger/config"
-	"flag"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
 )
-
-var addr = flag.String("addr", ":3001", "http service address")
 
 // Start the socket server
 func Start() {
