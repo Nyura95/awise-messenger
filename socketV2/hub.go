@@ -2,19 +2,19 @@ package socketv2
 
 import "log"
 
-// DisseminateToTheOthers for
+// DisseminateToTheOthers for send a message to all user except the broadcaster
 type DisseminateToTheOthers struct {
 	broadcaster int
 	message     []byte
 }
 
-// DisseminateToTheTarget for
+// DisseminateToTheTarget for send message to the target
 type DisseminateToTheTarget struct {
 	target  int
 	message []byte
 }
 
-// Hub client
+// Hub of the clients
 type Hub struct {
 	clients map[*Client]bool
 
@@ -41,6 +41,9 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
+			for client := range h.clients {
+				client.send <- []byte("New user connected")
+			}
 			h.clients[client] = true
 			Infos.add(client.user.UserID)
 			log.Printf("New client register %s (%d) alive now : %d", client.user.Fname, client.user.UserID, Infos.nbAlive())
@@ -52,7 +55,6 @@ func (h *Hub) run() {
 				log.Printf("Client unregister %s (%d) alive now : %d", client.user.Fname, client.user.UserID, Infos.nbAlive())
 			}
 		case disseminateToTheOthers := <-h.disseminateToTheOthers:
-			log.Println(disseminateToTheOthers)
 			for client := range h.clients {
 				if client.user.UserID != disseminateToTheOthers.broadcaster {
 					select {
@@ -83,3 +85,5 @@ func (h *Hub) run() {
 		}
 	}
 }
+
+func 

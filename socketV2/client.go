@@ -108,8 +108,6 @@ func serveWs(hub *Hub, user models.User, target int, w http.ResponseWriter, r *h
 		return
 	}
 
-	hub.broadcast <- []byte(string(user.UserID) + " is not connected")
-
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), user: &user, target: target}
 	client.hub.register <- client
 
