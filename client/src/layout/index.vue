@@ -44,7 +44,7 @@ export default {
     };
   },
   mounted: function() {
-    this.$store.dispatch("users/getAllUsers");
+    // this.$store.dispatch("users/getAllUsers");
   },
   methods: {
     logout() {

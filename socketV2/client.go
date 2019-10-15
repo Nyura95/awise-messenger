@@ -1,6 +1,7 @@
 package socketv2
 
 import (
+	"awise-messenger/models"
 	"bytes"
 	"log"
 	"net/http"
@@ -17,11 +18,8 @@ const (
 )
 
 var (
-	newline   = []byte{'\n'}
-	space     = []byte{' '}
-	target    = []byte("target")
-	charLeft  = []byte("{")
-	charRight = []byte("}")
+	newline = []byte{'\n'}
+	space   = []byte{' '}
 )
 
 var upgrader = websocket.Upgrader{
@@ -32,10 +30,10 @@ var upgrader = websocket.Upgrader{
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub    *Hub
-	id     int
+	user   *models.User
 	conn   *websocket.Conn
 	send   chan []byte
-	target []byte
+	target int
 }
 
 func (c *Client) readPump() {
@@ -55,17 +53,9 @@ func (c *Client) readPump() {
 			break
 		}
 
-		// add  auth here
-
-		if c.id == 0 {
-			break
-		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		if bytes.Index(message, target) != -1 {
-			c.target = message[bytes.Index(message, charLeft)+1 : bytes.Index(message, charRight)]
-			continue
-		}
-		c.hub.broadcast <- message
+
+		c.hub.disseminateToTheTarget <- &DisseminateToTheTarget{target: c.target, message: message}
 	}
 }
 
@@ -91,7 +81,6 @@ func (c *Client) writePump() {
 			w.Write(message)
 
 			n := len(c.send)
-			log.Println(n)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
 				w.Write(<-c.send)
@@ -109,19 +98,47 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub *Hub, user models.User, target int, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
 	conn, err := upgrader.Upgrade(w, r, nil)
-	log.Println("ok")
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), id: 0}
+
+	hub.broadcast <- []byte(string(user.UserID) + " is not connected")
+
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), user: &user, target: target}
 	client.hub.register <- client
 
 	go client.writePump()
 	go client.readPump()
+}
+
+func closeServeWs(msg []byte, w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	conn.SetWriteDeadline(time.Now().Add(writeWait))
+
+	t, err := conn.NextWriter(websocket.TextMessage)
+	if err != nil {
+		return
+	}
+	t.Write(msg)
+	if err := t.Close(); err != nil {
+		return
+	}
+
+	log.Printf("Disconnected user during login (%s)", string(msg))
+	conn.Close()
 }

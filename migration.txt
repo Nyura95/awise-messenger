@@ -62,4 +62,4 @@ CREATE TABLE access_token (
 );
 
 INSERT INTO access_token(user_id, token, refresh_token, flag_delete, created_at, updated_at) VALUES(1, 'token1', 'token1', 0, NOW(), NOW());
-INSERT INTO access_token(user_id, token, refresh_token, flag_delete, created_at, updated_at) VALUES(1, 'token2', 'token2', 0, NOW(), NOW());
+INSERT INTO access_token(user_id, token, refresh_token, flag_delete, created_at, updated_at) VALUES(2, 'token2', 'token2', 0, NOW(), NOW());

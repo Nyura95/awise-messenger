@@ -40,7 +40,8 @@ func IsGoodToken(next http.Handler) http.Handler {
 		}
 
 		accessToken := models.Token{Token: auth}
-		if err := accessToken.FindOne(); err != nil {
+		if err := accessToken.FindOneByToken(); err != nil {
+			log.Println("auth does not found")
 			http.Error(w, "Not authorized", 401)
 			return
 		}
