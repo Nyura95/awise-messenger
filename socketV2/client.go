@@ -2,6 +2,7 @@ package socketv2
 
 import (
 	"awise-messenger/models"
+	"awise-messenger/socketV2/action"
 	"bytes"
 	"log"
 	"net/http"
@@ -53,8 +54,8 @@ func (c *Client) readPump() {
 			break
 		}
 
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-
+		message = action.NewMessage(c.user.UserID, string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))).Send()
+		c.send <- message
 		c.hub.disseminateToTheTarget <- &DisseminateToTheTarget{target: c.target, message: message}
 	}
 }
@@ -68,6 +69,7 @@ func (c *Client) writePump() {
 	for {
 		select {
 		case message, ok := <-c.send:
+
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})

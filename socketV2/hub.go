@@ -1,6 +1,9 @@
 package socketv2
 
-import "log"
+import (
+	"awise-messenger/socketV2/action"
+	"log"
+)
 
 // DisseminateToTheOthers for send a message to all user except the broadcaster
 type DisseminateToTheOthers struct {
@@ -41,8 +44,8 @@ func (h *Hub) run() {
 	for {
 		select {
 		case client := <-h.register:
-			for client := range h.clients {
-				client.send <- []byte("New user connected")
+			for other := range h.clients {
+				other.send <- action.NewConnection(client.user.UserID).Send()
 			}
 			h.clients[client] = true
 			Infos.add(client.user.UserID)
@@ -52,6 +55,9 @@ func (h *Hub) run() {
 				delete(h.clients, client)
 				close(client.send)
 				Infos.del(client.user.UserID)
+				for other := range h.clients {
+					other.send <- action.NewDisconnection(client.user.UserID).Send()
+				}
 				log.Printf("Client unregister %s (%d) alive now : %d", client.user.Fname, client.user.UserID, Infos.nbAlive())
 			}
 		case disseminateToTheOthers := <-h.disseminateToTheOthers:
@@ -85,5 +91,3 @@ func (h *Hub) run() {
 		}
 	}
 }
-
-func 
