@@ -1,7 +1,7 @@
 package socketv2
 
 import (
-	"awise-messenger/models"
+	"awise-messenger/modelsv2"
 	"awise-messenger/socketV2/action"
 	"bytes"
 	"log"
@@ -31,7 +31,7 @@ var upgrader = websocket.Upgrader{
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub    *Hub
-	user   *models.User
+	user   *modelsv2.User
 	conn   *websocket.Conn
 	send   chan []byte
 	target int
@@ -100,7 +100,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, user models.User, target int, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub *Hub, user *modelsv2.User, target int, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
@@ -110,14 +110,14 @@ func serveWs(hub *Hub, user models.User, target int, w http.ResponseWriter, r *h
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), user: &user, target: target}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), user: user, target: target}
 	client.hub.register <- client
 
 	go client.writePump()
 	go client.readPump()
 }
 
-func closeServeWs(msg []byte, w http.ResponseWriter, r *http.Request) {
+func closeServeWs(msg string, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
@@ -134,7 +134,7 @@ func closeServeWs(msg []byte, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	t.Write(msg)
+	t.Write(action.NewError(msg).Send())
 	if err := t.Close(); err != nil {
 		return
 	}

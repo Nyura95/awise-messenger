@@ -1,7 +1,6 @@
-package models
+package modelsv2
 
 import (
-	"awise-messenger/config"
 	"database/sql"
 	"log"
 
@@ -12,10 +11,9 @@ import (
 var db *sql.DB
 
 // InitDb for start a pool connection
-func InitDb() {
+func InitDb(user string, password string, host string, database string) {
 	var err error
-	conf, _ := config.GetConfig()
-	db, err = sql.Open("mysql", conf.User+":"+conf.Password+"@tcp("+conf.Host+":3306)/"+conf.Database+"?parseTime=true")
+	db, err = sql.Open("mysql", user+":"+password+"@tcp("+host+":3306)/"+database+"?parseTime=true")
 	if err != nil {
 		log.Panic(err)
 	}

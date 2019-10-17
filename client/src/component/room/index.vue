@@ -17,6 +17,7 @@
         class="btn"
       />
     </div>
+    <div class="text-danger" v-if="error">Une erreur est survenu !</div>
     <div class="col-12 mt-4">
       message :
       <input v-model="message" type="text" @keyup.enter="sendMessage" />
@@ -67,7 +68,8 @@ export default {
       socket: null,
       message: "",
       messages: [],
-      open: false
+      open: false,
+      error: false
     };
   },
   methods: {
@@ -79,6 +81,7 @@ export default {
       this.socket = null;
     },
     start() {
+      this.error = false;
       if (this.socket) {
         this.socket.close();
       }
@@ -119,10 +122,14 @@ export default {
               tag: new Date()
             });
           }
+          if (message.Action === "Error") {
+            this.error = true;
+          }
         }
       };
       this.socket.onerror = err => {
         this.log(err);
+        this.error = true;
       };
     },
     log(...messages) {

@@ -2,7 +2,7 @@
   <Layout>
     <div class="row">
       <div class="col-5 mx-auto room">
-        <Room name="Alexis" token="token1" :target="2" />
+        <Room name="Alexis" token="token5" :target="2" />
       </div>
       <div class="col-5 mx-auto room">
         <Room name="Valentin" token="token2" :target="1" />

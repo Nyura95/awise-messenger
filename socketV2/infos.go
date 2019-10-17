@@ -1,26 +1,26 @@
 package socketv2
 
 type info struct {
-	list []int
+	List []int
 }
 
 // Infos public
 var Infos = info{}
 
 func (i *info) add(id int) {
-	i.list = append(i.list, id)
+	i.List = append(i.List, id)
 }
 
 func (i *info) del(id int) {
-	for index, idAccount := range i.list {
+	for index, idAccount := range i.List {
 		if idAccount == id {
-			i.list = append(i.list[:index], i.list[index+1:]...)
+			i.List = append(i.List[:index], i.List[index+1:]...)
 		}
 	}
 }
 
 func (i *info) alive(id int) bool {
-	for _, idAccount := range i.list {
+	for _, idAccount := range i.List {
 		if idAccount == id {
 			return true
 		}
@@ -29,5 +29,5 @@ func (i *info) alive(id int) bool {
 }
 
 func (i *info) nbAlive() int {
-	return len(i.list)
+	return len(i.List)
 }

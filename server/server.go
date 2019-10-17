@@ -3,7 +3,7 @@ package server
 import (
 	"awise-messenger/config"
 	"awise-messenger/server/middleware"
-	v1 "awise-messenger/server/v1"
+	v2 "awise-messenger/server/v2"
 	"log"
 	"net/http"
 	"strconv"
@@ -14,7 +14,7 @@ import (
 
 // Start for start the http server
 func Start() {
-	config := config.GetConfig()
+	config, _ := config.GetConfig()
 	r := mux.NewRouter()
 
 	// Cors auth
@@ -25,18 +25,20 @@ func Start() {
 	// middleware
 	r.Use(middleware.BasicHeader)
 	r.Use(middleware.Logger)
-	r.Use(middleware.IsGoodToken)
+	// r.Use(middleware.IsGoodToken)
 
-	// Get or Create a conversation with one target
-	r.HandleFunc("/api/v1/conversation/target/{id}", v1.GetConvoByTarget).Methods("GET")
-	// Get or Create a conversation with one target
-	r.HandleFunc("/api/v1/conversation/{id}", v1.GetConvoByID).Methods("GET")
-	// Get all conversation for the user
-	r.HandleFunc("/api/v1/conversation", v1.GetAllConvo).Methods("GET")
-	// Get info user
-	r.HandleFunc("/api/v1/info", v1.GetInfo).Methods("GET")
-	// Get all users
-	r.HandleFunc("/api/v1/users", v1.GetAllUser).Methods("GET")
+	// // Get or Create a conversation with one target
+	// r.HandleFunc("/api/v1/conversation/target/{id}", v1.GetConvoByTarget).Methods("GET")
+	// // Get or Create a conversation with one target
+	// r.HandleFunc("/api/v1/conversation/{id}", v1.GetConvoByID).Methods("GET")
+	// // Get all conversation for the user
+	// r.HandleFunc("/api/v1/conversation", v1.GetAllConvo).Methods("GET")
+	// // Get info user
+	// r.HandleFunc("/api/v1/info", v1.GetInfo).Methods("GET")
+	// // Get all users
+	// r.HandleFunc("/api/v1/users", v1.GetAllUser).Methods("GET")
+
+	r.HandleFunc("/api/v2/users", v2.GetUsers).Methods("GET")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")

@@ -97,7 +97,7 @@ func handler(ws *websocket.Conn) {
 
 // Start the socket server
 func Start() {
-	config := config.GetConfig()
+	config, _ := config.GetConfig()
 	Customers = make([]*Customer, 0)
 	r := mux.NewRouter()
 

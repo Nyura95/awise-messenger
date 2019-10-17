@@ -2,7 +2,8 @@ package socketv2
 
 import (
 	"awise-messenger/config"
-	"awise-messenger/models"
+	"awise-messenger/modelsv2"
+	"awise-messenger/worker"
 	"log"
 	"net/http"
 	"strconv"
@@ -10,20 +11,27 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var (
-	queryEmpty           = []byte("query is empty")
-	tokenDelete          = []byte("this token is delete")
-	authNotFound         = []byte("auth does not found")
-	userAlreadyConnected = []byte("user already connected")
-	userNotFound         = []byte("user not found")
-	targetNotFound       = []byte("target not found")
-	targetIsNotANumber   = []byte("target is not a number")
-	tagetIsUser          = []byte("target is the user")
+const (
+	queryEmpty           = "query is empty"
+	tokenDelete          = "this token is delete"
+	authNotFound         = "auth does not found"
+	userAlreadyConnected = "user already connected"
+	userNotFound         = "user not found"
+	targetNotFound       = "target not found"
+	targetIsNotANumber   = "target is not a number"
+	tagetIsUser          = "target is the user"
 )
+
+type middleware struct {
+	user   *modelsv2.User
+	target int
+	auth   bool
+	msg    string
+}
 
 // Start the socket server
 func Start() {
-	config := config.GetConfig()
+	config, _ := config.GetConfig()
 
 	hub := newHub()
 	go hub.run()
@@ -31,55 +39,74 @@ func Start() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/{token}/{target}", func(w http.ResponseWriter, r *http.Request) {
-		auth := mux.Vars(r)["token"]
-		target := mux.Vars(r)["target"]
-
-		if auth == "" || target == "" {
-			closeServeWs(queryEmpty, w, r)
+		pool := worker.CreateWorkerPool(checkAuth)
+		defer pool.Close()
+		middleware := pool.Process(r).(*middleware)
+		if middleware.auth == false {
+			closeServeWs(middleware.msg, w, r)
 			return
 		}
-
-		accessToken := models.Token{Token: auth}
-		if err := accessToken.FindOneByToken(); err != nil {
-			closeServeWs(authNotFound, w, r)
-			return
-		}
-		if accessToken.FlagDelete != 0 {
-			closeServeWs(tokenDelete, w, r)
-			return
-		}
-
-		if alive := Infos.alive(accessToken.UserID); alive == true {
-			closeServeWs(userAlreadyConnected, w, r)
-			return
-		}
-
-		user := models.User{UserID: accessToken.UserID}
-		if err := user.FindOne(); err != nil {
-			closeServeWs(userNotFound, w, r)
-			return
-		}
-
-		idTarget, err := strconv.Atoi(target)
-		if err != nil {
-			closeServeWs(targetIsNotANumber, w, r)
-			return
-		}
-		userTarget := models.User{UserID: idTarget}
-		if err := userTarget.FindOne(); err != nil {
-			closeServeWs(targetNotFound, w, r)
-			return
-		}
-
-		if user.UserID == userTarget.UserID {
-			closeServeWs(tagetIsUser, w, r)
-			return
-		}
-		serveWs(hub, user, userTarget.UserID, w, r)
+		serveWs(hub, middleware.user, middleware.target, w, r)
 	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))
 	if err := http.ListenAndServe("127.0.0.1:"+strconv.Itoa(config.SocketPort), r); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+}
+
+func checkAuth(payload interface{}) interface{} {
+	r := payload.(*http.Request)
+	middleware := &middleware{auth: false}
+
+	token := mux.Vars(r)["token"]
+	target := mux.Vars(r)["target"]
+
+	if token == "" || target == "" {
+		middleware.msg = queryEmpty
+		return middleware
+	}
+
+	accessToken, err := modelsv2.FindTokenByToken(token)
+	if accessToken.ID == 0 || err != nil {
+		middleware.msg = authNotFound
+		return middleware
+	}
+	if accessToken.FlagDelete != 0 {
+		middleware.msg = tokenDelete
+		return middleware
+	}
+
+	if alive := Infos.alive(accessToken.UserID); alive == true {
+		middleware.msg = userAlreadyConnected
+		return middleware
+	}
+
+	user, err := modelsv2.FindUser(accessToken.UserID)
+	if user.UserID == 0 || err != nil {
+		middleware.msg = userNotFound
+		return middleware
+	}
+	middleware.user = user
+
+	idTarget, err := strconv.Atoi(target)
+	if err != nil {
+		middleware.msg = targetIsNotANumber
+		return middleware
+	}
+	userTarget, err := modelsv2.FindUser(idTarget)
+	if userTarget.UserID == 0 || err != nil {
+		middleware.msg = targetNotFound
+		return middleware
+	}
+	middleware.target = userTarget.UserID
+
+	if user.UserID == userTarget.UserID {
+		middleware.msg = tagetIsUser
+		return middleware
+	}
+
+	middleware.auth = true
+
+	return middleware
 }

@@ -23,7 +23,6 @@ func GetAllUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Error get users !")
-		log.Panicln(err)
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error get users", -1))
 		return
 	}
