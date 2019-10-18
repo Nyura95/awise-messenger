@@ -25,7 +25,7 @@ func Start() {
 	// middleware
 	r.Use(middleware.BasicHeader)
 	r.Use(middleware.Logger)
-	// r.Use(middleware.IsGoodToken)
+	r.Use(middleware.IsGoodToken)
 
 	// // Get or Create a conversation with one target
 	// r.HandleFunc("/api/v1/conversation/target/{id}", v1.GetConvoByTarget).Methods("GET")
@@ -39,6 +39,8 @@ func Start() {
 	// r.HandleFunc("/api/v1/users", v1.GetAllUser).Methods("GET")
 
 	r.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
+
+	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")

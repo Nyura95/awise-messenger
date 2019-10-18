@@ -10,10 +10,6 @@ import (
 	"net/http"
 )
 
-const (
-	databaseError = "database_error"
-)
-
 type onlineAccount struct {
 	modelsv2.Account
 	Online bool
@@ -24,7 +20,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	accounts, err := modelsv2.FindAllAccount()
 	if err != nil {
 		log.Println("Error when getting the users in the database")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), databaseError, -1))
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error database", -1))
 		return
 	}
 	pool := worker.CreateWorkerPool(getAccountOnline)

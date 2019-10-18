@@ -1,6 +1,9 @@
 package modelsv2
 
-import "time"
+import (
+	"awise-messenger/helpers"
+	"time"
+)
 
 // Conversation table model
 type Conversation struct {
@@ -10,7 +13,7 @@ type Conversation struct {
 	TokenConversation string
 	IDLastMessage     int
 	IDFirstMessage    int
-	IDStatus          time.Time
+	IDStatus          int
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
@@ -59,7 +62,7 @@ func (c *Conversation) Update() error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(c.UniqHash, c.Title, c.TokenConversation, c.IDLastMessage, c.IDFirstMessage, c.IDStatus, time.UTC, c.ID)
+	_, err = stmt.Exec(c.UniqHash, c.Title, c.TokenConversation, c.IDLastMessage, c.IDFirstMessage, c.IDStatus, helpers.GetUtc(), c.ID)
 	if err != nil {
 		return err
 	}
@@ -67,7 +70,7 @@ func (c *Conversation) Update() error {
 	return nil
 }
 
-// Create a new conversation
+// Create new conversation
 func (c *Conversation) Create() error {
 	stmt, err := db.Prepare("INSERT INTO tbl_conversations(uniq_hash, title, token_conversation, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
@@ -75,10 +78,21 @@ func (c *Conversation) Create() error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(c.UniqHash, c.Title, c.TokenConversation, c.IDLastMessage, c.IDFirstMessage, c.IDStatus, time.UTC, time.UTC)
+	utc := helpers.GetUtc()
+	c.CreatedAt = utc
+	c.UpdatedAt = utc
+
+	result, err := stmt.Exec(c.UniqHash, c.Title, c.TokenConversation, c.IDLastMessage, c.IDFirstMessage, c.IDStatus, c.CreatedAt, c.UpdatedAt)
 	if err != nil {
 		return err
 	}
+
+	ID, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	c, _ = FindConversation(int(ID))
 
 	return nil
 }

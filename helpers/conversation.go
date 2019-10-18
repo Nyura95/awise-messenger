@@ -30,12 +30,12 @@ func TransformConversationInFront(conversation *models.Conversation, userID int)
 }
 
 // Uniqhash for get the uniq_hash conversation
-func Uniqhash(creator int, receiver int) string {
+func Uniqhash(IDAccount1 int, IDAccount2 int) string {
 	var hash string
-	if creator > receiver {
-		hash = strconv.Itoa(receiver) + strconv.Itoa(creator)
+	if IDAccount1 > IDAccount2 {
+		hash = strconv.Itoa(IDAccount2) + strconv.Itoa(IDAccount1)
 	} else {
-		hash = strconv.Itoa(creator) + strconv.Itoa(receiver)
+		hash = strconv.Itoa(IDAccount1) + strconv.Itoa(IDAccount2)
 	}
 	return hash
 }
@@ -43,7 +43,7 @@ func Uniqhash(creator int, receiver int) string {
 // Token for get the token conversation
 func Token(Uniqhash string) string {
 	h := sha1.New()
-	h.Write([]byte(Uniqhash))
+	h.Write([]byte(Uniqhash + "randomkey"))
 	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
 
