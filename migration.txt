@@ -11,6 +11,15 @@ CREATE TABLE tbl_conversations (
 	PRIMARY key(id)
 );
 
+CREATE TABLE tbl_rooms (
+	id int(11) not null auto_increment, 
+	id_conversation int(11) not null,
+	id_account int(11) not null,
+	created_at DATETIME,
+	updated_at DATETIME,
+	primary key(id)
+);
+
 CREATE TABLE tbl_messages (
 	id int(11) NOT NULL AUTO_INCREMENT,
 	id_account int(11) NOT NULL,
