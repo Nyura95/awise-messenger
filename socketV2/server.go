@@ -23,10 +23,10 @@ const (
 )
 
 type middleware struct {
-	user   *modelsv2.User
-	target int
-	auth   bool
-	msg    string
+	account *modelsv2.Account
+	target  int
+	auth    bool
+	msg     string
 }
 
 // Start the socket server
@@ -46,7 +46,7 @@ func Start() {
 			closeServeWs(middleware.msg, w, r)
 			return
 		}
-		serveWs(hub, middleware.user, middleware.target, w, r)
+		serveWs(hub, middleware.account, middleware.target, w, r)
 	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))
@@ -67,7 +67,7 @@ func checkAuth(payload interface{}) interface{} {
 		return middleware
 	}
 
-	accessToken, err := modelsv2.FindTokenByToken(token)
+	accessToken, err := modelsv2.FindAccessTokenByToken(token)
 	if accessToken.ID == 0 || err != nil {
 		middleware.msg = authNotFound
 		return middleware
@@ -77,31 +77,31 @@ func checkAuth(payload interface{}) interface{} {
 		return middleware
 	}
 
-	if alive := Infos.alive(accessToken.UserID); alive == true {
+	if alive := Infos.alive(accessToken.IDAccount); alive == true {
 		middleware.msg = userAlreadyConnected
 		return middleware
 	}
 
-	user, err := modelsv2.FindUser(accessToken.UserID)
-	if user.UserID == 0 || err != nil {
+	account, err := modelsv2.FindAccount(accessToken.IDAccount)
+	if account.ID == 0 || err != nil {
 		middleware.msg = userNotFound
 		return middleware
 	}
-	middleware.user = user
+	middleware.account = account
 
 	idTarget, err := strconv.Atoi(target)
 	if err != nil {
 		middleware.msg = targetIsNotANumber
 		return middleware
 	}
-	userTarget, err := modelsv2.FindUser(idTarget)
-	if userTarget.UserID == 0 || err != nil {
+	accountTarget, err := modelsv2.FindAccount(idTarget)
+	if accountTarget.ID == 0 || err != nil {
 		middleware.msg = targetNotFound
 		return middleware
 	}
-	middleware.target = userTarget.UserID
+	middleware.target = accountTarget.ID
 
-	if user.UserID == userTarget.UserID {
+	if account.ID == accountTarget.ID {
 		middleware.msg = tagetIsUser
 		return middleware
 	}

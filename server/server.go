@@ -38,7 +38,7 @@ func Start() {
 	// // Get all users
 	// r.HandleFunc("/api/v1/users", v1.GetAllUser).Methods("GET")
 
-	r.HandleFunc("/api/v2/users", v2.GetUsers).Methods("GET")
+	r.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")

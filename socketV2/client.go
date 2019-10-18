@@ -30,11 +30,11 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub    *Hub
-	user   *modelsv2.User
-	conn   *websocket.Conn
-	send   chan []byte
-	target int
+	hub     *Hub
+	account *modelsv2.Account
+	conn    *websocket.Conn
+	send    chan []byte
+	target  int
 }
 
 func (c *Client) readPump() {
@@ -54,7 +54,7 @@ func (c *Client) readPump() {
 			break
 		}
 
-		message = action.NewMessage(c.user.UserID, string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))).Send()
+		message = action.NewMessage(c.account.ID, string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))).Send()
 		c.send <- message
 		c.hub.disseminateToTheTarget <- &DisseminateToTheTarget{target: c.target, message: message}
 	}
@@ -100,7 +100,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, user *modelsv2.User, target int, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub *Hub, account *modelsv2.Account, target int, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
@@ -110,7 +110,7 @@ func serveWs(hub *Hub, user *modelsv2.User, target int, w http.ResponseWriter, r
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), user: user, target: target}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), account: account, target: target}
 	client.hub.register <- client
 
 	go client.writePump()

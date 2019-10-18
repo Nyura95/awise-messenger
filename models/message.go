@@ -81,7 +81,7 @@ func FindAllMessageNotRead(idConversation int, IDUser int) ([]*Message, error) {
 
 // Create the message
 func (message *Message) Create() error {
-	insert, err := db.Exec("INSERT INTO tbl_messages(id_user, id_conversation, message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", message.IDUser, message.IDConversation, message.Message, message.IDStatus, time.Now(), time.Now())
+	insert, err := db.Exec("INSERT INTO tbl_messages(id_user, id_conversation, message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", message.IDUser, message.IDConversation, message.Message, message.IDStatus,  time.UTC,  time.UTC)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (message *Message) Create() error {
 
 // Update the message
 func (message *Message) Update() error {
-	_, err := db.Exec("UPDATE tbl_messages SET message = ?, id_status = ?, updated_at = ? WHERE id_message = ?", message.Message, message.IDStatus, time.Now(), message.IDMessage)
+	_, err := db.Exec("UPDATE tbl_messages SET message = ?, id_status = ?, updated_at = ? WHERE id_message = ?", message.Message, message.IDStatus,  time.UTC, message.IDMessage)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (message *Message) Update() error {
 
 // UpdateMessageRead the message
 func (message *Message) UpdateMessageRead() error {
-	_, err := db.Exec("UPDATE tbl_messages SET id_status = 2, updated_at = ? WHERE id_conversation = ? and id_user = ?", time.Now(), message.IDConversation, message.IDUser)
+	_, err := db.Exec("UPDATE tbl_messages SET id_status = 2, updated_at = ? WHERE id_conversation = ? and id_user = ?",  time.UTC, message.IDConversation, message.IDUser)
 	if err != nil {
 		return err
 	}

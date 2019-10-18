@@ -96,7 +96,7 @@ func (conversation *Conversation) FindOneByTokenReceiver() error {
 
 // Create the conversation
 func (conversation *Conversation) Create() error {
-	insert, err := db.Exec("INSERT INTO tbl_conversations(uniq_hash, title, id_creator, token_creator, id_receiver, token_receiver, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", conversation.UniqHash, conversation.Title, conversation.IDCreator, conversation.TokenCreator, conversation.IDReceiver, conversation.TokenReceiver, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.Now(), time.Now())
+	insert, err := db.Exec("INSERT INTO tbl_conversations(uniq_hash, title, id_creator, token_creator, id_receiver, token_receiver, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", conversation.UniqHash, conversation.Title, conversation.IDCreator, conversation.TokenCreator, conversation.IDReceiver, conversation.TokenReceiver, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.UTC, time.UTC)
 	if err != nil {
 		log.Panicln(err)
 		return err
@@ -119,7 +119,7 @@ func (conversation *Conversation) Create() error {
 
 // Update the message
 func (conversation *Conversation) Update() error {
-	_, err := db.Exec("UPDATE tbl_conversations SET title = ?, id_last_message = ?, id_first_message = ?, id_status = ?, updated_at = ? WHERE id_conversation = ?", conversation.Title, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.Now(), conversation.IDConversation)
+	_, err := db.Exec("UPDATE tbl_conversations SET title = ?, id_last_message = ?, id_first_message = ?, id_status = ?, updated_at = ? WHERE id_conversation = ?", conversation.Title, conversation.IDLastMessage, conversation.IDFirstMessage, conversation.IDStatus, time.UTC, conversation.IDConversation)
 	if err != nil {
 		log.Panic(err)
 		return err

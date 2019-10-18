@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-// DisseminateToTheOthers for send a message to all user except the broadcaster
+// DisseminateToTheOthers for send a message to all account except the broadcaster
 type DisseminateToTheOthers struct {
 	broadcaster int
 	message     []byte
@@ -45,24 +45,24 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			for other := range h.clients {
-				other.send <- action.NewConnection(client.user.UserID).Send()
+				other.send <- action.NewConnection(client.account.ID).Send()
 			}
 			h.clients[client] = true
-			Infos.add(client.user.UserID)
-			log.Printf("New client register %s (%d) alive now : %d", client.user.Fname, client.user.UserID, Infos.nbAlive())
+			Infos.add(client.account.ID)
+			log.Printf("New client register %s (%d) alive now : %d", client.account.Firstname, client.account.ID, Infos.nbAlive())
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)
 				close(client.send)
-				Infos.del(client.user.UserID)
+				Infos.del(client.account.ID)
 				for other := range h.clients {
-					other.send <- action.NewDisconnection(client.user.UserID).Send()
+					other.send <- action.NewDisconnection(client.account.ID).Send()
 				}
-				log.Printf("Client unregister %s (%d) alive now : %d", client.user.Fname, client.user.UserID, Infos.nbAlive())
+				log.Printf("Client unregister %s (%d) alive now : %d", client.account.Firstname, client.account.ID, Infos.nbAlive())
 			}
 		case disseminateToTheOthers := <-h.disseminateToTheOthers:
 			for client := range h.clients {
-				if client.user.UserID != disseminateToTheOthers.broadcaster {
+				if client.account.ID != disseminateToTheOthers.broadcaster {
 					select {
 					case client.send <- disseminateToTheOthers.message:
 					default:
@@ -72,7 +72,7 @@ func (h *Hub) run() {
 			}
 		case disseminateToTheTarget := <-h.disseminateToTheTarget:
 			for client := range h.clients {
-				if client.user.UserID == disseminateToTheTarget.target {
+				if client.account.ID == disseminateToTheTarget.target {
 					select {
 					case client.send <- disseminateToTheTarget.message:
 					default:
