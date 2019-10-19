@@ -1,6 +1,9 @@
 package modelsv2
 
-import "time"
+import (
+	"awise-messenger/helpers"
+	"time"
+)
 
 // Message table model
 type Message struct {
@@ -65,18 +68,30 @@ func (m *Message) Update() error {
 	return nil
 }
 
-// Create a new message
-func (m *Message) Create() error {
+// CreateMessage for insert a new message into the database
+func CreateMessage(IDAccount int, IDConversation int, msg string, IDStatus int) (*Message, error) {
+	message := &Message{}
 	stmt, err := db.Prepare("INSERT INTO tbl_messages(id_account, id_conversation, message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return message, err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(m.IDAccount, m.IDConversation, m.Message, m.IDStatus, time.UTC, time.UTC)
+	utc := helpers.GetUtc()
+	result, err := stmt.Exec(IDAccount, IDConversation, msg, IDStatus, utc, utc)
 	if err != nil {
-		return err
+		return message, err
 	}
 
-	return nil
+	ID, err := result.LastInsertId()
+	if err != nil {
+		return message, err
+	}
+
+	message, err = FindMessage(int(ID))
+	if err != nil {
+		return message, err
+	}
+
+	return message, nil
 }

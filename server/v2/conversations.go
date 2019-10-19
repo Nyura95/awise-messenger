@@ -44,15 +44,14 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	IDConversation, err := modelsv2.FindRoomBetweenTwoAccount(account1.ID, account2.ID)
+	conversation, err := modelsv2.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
 	if err != nil {
 		log.Printf("Error when getting the room between the accounts")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2))
 		return
 	}
 
-	var conversation *modelsv2.Conversation
-	if IDConversation == 0 {
+	if conversation.ID == 0 {
 		jobs := make(chan *modelsv2.Conversation, 1)
 		go createNewConversation(account1, account2, jobs)
 		conversation = <-jobs
@@ -62,7 +61,6 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		conversation, err = modelsv2.FindConversation(IDConversation)
 		if conversation.ID == 0 {
 			log.Printf("Error when creating the conversation into the datatable")
 			json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2))
@@ -79,11 +77,15 @@ func getAccount(ID int, job chan *modelsv2.Account) {
 }
 
 func createNewConversation(account1 *modelsv2.Account, account2 *modelsv2.Account, create chan *modelsv2.Conversation) {
-	conversation := &modelsv2.Conversation{IDFirstMessage: 0, IDLastMessage: 0, Title: "", IDStatus: 1}
-	conversation.UniqHash = helpers.Uniqhash(account1.ID, account2.ID)
-	conversation.TokenConversation = helpers.Token(conversation.UniqHash)
-	err := conversation.Create()
+	uniqHash := helpers.Uniqhash(account1.ID, account2.ID)
+	conversation, err := modelsv2.CreateConversation(uniqHash, "", helpers.Token(uniqHash), 0, 0, 1)
 	if err != nil {
+		log.Println(err)
+		create <- conversation
+		return
+	}
+	if conversation.ID == 0 {
+		log.Println("Error create new conversation")
 		create <- conversation
 		return
 	}

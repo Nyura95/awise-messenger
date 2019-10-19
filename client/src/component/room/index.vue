@@ -25,7 +25,7 @@
     </div>
     <div class="col-12 mt-4">
       <div class="row" v-for="(message, key) in messages" :key="key">
-        <div class="col-2">{{message.User}}:</div>
+        <div class="col-2">{{message.IDAccount}}:</div>
         <div class="col-10">{{message.Message}}</div>
       </div>
     </div>
@@ -106,7 +106,7 @@ export default {
           this.log(messages[i]);
           if (message.Action === "Message") {
             this.message = "";
-            this.messages.push(message);
+            this.messages.push(message.Message);
           }
           if (message.Action === "Connection") {
             new Notification("Nouvelle connexion", {

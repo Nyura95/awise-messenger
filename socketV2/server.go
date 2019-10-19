@@ -20,13 +20,16 @@ const (
 	targetNotFound       = "target not found"
 	targetIsNotANumber   = "target is not a number"
 	tagetIsUser          = "target is the user"
+	conversationNotFound = "Conversation not found"
 )
 
 type middleware struct {
-	account *modelsv2.Account
-	target  int
-	auth    bool
-	msg     string
+	account      *modelsv2.Account
+	target       int
+	conversation *modelsv2.Conversation
+
+	auth bool
+	msg  string
 }
 
 // Start the socket server
@@ -46,7 +49,7 @@ func Start() {
 			closeServeWs(middleware.msg, w, r)
 			return
 		}
-		serveWs(hub, middleware.account, middleware.target, w, r)
+		serveWs(hub, middleware.account, middleware.target, middleware.conversation, w, r)
 	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))
@@ -106,6 +109,13 @@ func checkAuth(payload interface{}) interface{} {
 		return middleware
 	}
 
+	conversation, err := modelsv2.FindConversationBetweenTwoAccount(account.ID, accountTarget.ID)
+	if err != nil {
+		middleware.msg = conversationNotFound
+		return middleware
+	}
+
+	middleware.conversation = conversation
 	middleware.auth = true
 
 	return middleware

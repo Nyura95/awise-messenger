@@ -2,6 +2,7 @@ package modelsv2
 
 import (
 	"awise-messenger/helpers"
+	"errors"
 	"time"
 )
 
@@ -88,23 +89,6 @@ func FindAllRoomsByIDAccount(IDAccount int) ([]*Room, error) {
 	return rooms, nil
 }
 
-// FindRoomBetweenTwoAccount for find the rooms between two account
-func FindRoomBetweenTwoAccount(IDAccount1 int, IDAccount2 int) (int, error) {
-	var IDConversation int
-	result, err := db.Query("SELECT id_conversation from tbl_rooms WHERE id_account = ? or id_account = ? GROUP BY id_conversation HAVING count(id_conversation) > 1 LIMIT 1;", IDAccount1, IDAccount2)
-	if err != nil {
-		return IDConversation, err
-	}
-	defer result.Close()
-	for result.Next() {
-		err := result.Scan(&IDConversation)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-	return IDConversation, nil
-}
-
 // Update a room
 func (r *Room) Update() error {
 	stmt, err := db.Prepare("UPDATE tbl_rooms SET id_conversation = ?, id_account = ?, updated_at = ? WHERE id = ?")
@@ -121,39 +105,41 @@ func (r *Room) Update() error {
 	return nil
 }
 
-// Create new conversation
-func (r *Room) Create() error {
+// CreateRoom new conversation
+func CreateRoom(IDConversation int, IDAccount int) (*Room, error) {
+	room := &Room{}
 	stmt, err := db.Prepare("INSERT INTO tbl_rooms(id_conversation, id_account, created_at, updated_at) VALUES (?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return room, err
 	}
 	defer stmt.Close()
 
 	utc := helpers.GetUtc()
-	r.CreatedAt = utc
-	r.UpdatedAt = utc
 
-	result, err := stmt.Exec(r.IDConversation, r.IDAccount, r.CreatedAt, r.UpdatedAt)
+	result, err := stmt.Exec(IDConversation, IDAccount, utc, utc)
 	if err != nil {
-		return err
+		return room, err
 	}
 
 	ID, err := result.LastInsertId()
 	if err != nil {
-		return err
+		return room, err
 	}
 
-	r, _ = FindRoom(int(ID))
+	room, _ = FindRoom(int(ID))
 
-	return nil
+	return room, nil
 }
 
 // CreateRoomForMultipleAccount dsq
 func CreateRoomForMultipleAccount(IDConversation int, IDAccounts ...int) error {
 	for _, IDAccount := range IDAccounts {
-		room := Room{IDAccount: IDAccount, IDConversation: IDConversation}
-		if err := room.Create(); err != nil {
+		room, err := CreateRoom(IDConversation, IDAccount)
+		if err != nil {
 			return err
+		}
+		if room.ID == 0 {
+			return errors.New("Error during creating a new room")
 		}
 	}
 	return nil
