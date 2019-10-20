@@ -13,6 +13,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+type conversationWithToken struct {
+	*modelsv2.Conversation
+	Token string
+}
+
 // GetConversationWithATarget get or create a conversation with a other account
 func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 
@@ -68,7 +73,14 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	json.NewEncoder(w).Encode(response.BasicResponse(conversation, "ok", 1))
+	room, err := modelsv2.FindRoomByIDConversationAndIDAccount(conversation.ID, IDUser)
+	if err != nil {
+		log.Printf("Error when getting the room for the token")
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2))
+		return
+	}
+
+	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Token: room.Token}, "ok", 1))
 }
 
 func getAccount(ID int, job chan *modelsv2.Account) {
@@ -78,7 +90,7 @@ func getAccount(ID int, job chan *modelsv2.Account) {
 
 func createNewConversation(account1 *modelsv2.Account, account2 *modelsv2.Account, create chan *modelsv2.Conversation) {
 	uniqHash := helpers.Uniqhash(account1.ID, account2.ID)
-	conversation, err := modelsv2.CreateConversation(uniqHash, "", helpers.Token(uniqHash), 0, 0, 1)
+	conversation, err := modelsv2.CreateConversation(uniqHash, "", 0, 0, 1)
 	if err != nil {
 		log.Println(err)
 		create <- conversation

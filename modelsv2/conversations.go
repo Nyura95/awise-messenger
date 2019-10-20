@@ -7,27 +7,26 @@ import (
 
 // Conversation table model
 type Conversation struct {
-	ID                int
-	UniqHash          string
-	Title             string
-	TokenConversation string
-	IDLastMessage     int
-	IDFirstMessage    int
-	IDStatus          int
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ID             int
+	UniqHash       string
+	Title          string
+	IDLastMessage  int
+	IDFirstMessage int
+	IDStatus       int
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 // FindConversation for find one conversation by id
 func FindConversation(id int) (*Conversation, error) {
 	conversation := Conversation{}
-	result, err := db.Query("SELECT id, uniq_hash, title, token_conversation, id_last_message, id_first_message, id_status, created_at, updated_at FROM tbl_conversations WHERE id = ? LIMIT 1", id)
+	result, err := db.Query("SELECT id, uniq_hash, title, id_last_message, id_first_message, id_status, created_at, updated_at FROM tbl_conversations WHERE id = ? LIMIT 1", id)
 	if err != nil {
 		return &conversation, err
 	}
 	defer result.Close()
 	for result.Next() {
-		err := result.Scan(&conversation.ID, &conversation.UniqHash, &conversation.Title, &conversation.TokenConversation, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+		err := result.Scan(&conversation.ID, &conversation.UniqHash, &conversation.Title, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -62,14 +61,14 @@ func FindConversationBetweenTwoAccount(IDAccount1 int, IDAccount2 int) (*Convers
 // FindAllConversation for find all conversations in the database
 func FindAllConversation() ([]*Conversation, error) {
 	conversations := []*Conversation{}
-	result, err := db.Query("SELECT id, uniq_hash, title, token_conversation, id_last_message, id_first_message, id_status, created_at, updated_at FROM tbl_conversations")
+	result, err := db.Query("SELECT id, uniq_hash, title, id_last_message, id_first_message, id_status, created_at, updated_at FROM tbl_conversations")
 	if err != nil {
 		return conversations, err
 	}
 	defer result.Close()
 	for result.Next() {
 		conversation := Conversation{}
-		err := result.Scan(&conversation.ID, &conversation.UniqHash, &conversation.Title, &conversation.TokenConversation, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
+		err := result.Scan(&conversation.ID, &conversation.UniqHash, &conversation.Title, &conversation.IDLastMessage, &conversation.IDFirstMessage, &conversation.IDStatus, &conversation.CreatedAt, &conversation.UpdatedAt)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -80,13 +79,13 @@ func FindAllConversation() ([]*Conversation, error) {
 
 // Update a conversation
 func (c *Conversation) Update() error {
-	stmt, err := db.Prepare("UPDATE tbl_conversations SET uniq_hash = ?, title = ?, token_conversation = ?, id_last_message = ?, id_first_message = ?, id_status = ?, updated_at = ? WHERE id = ?")
+	stmt, err := db.Prepare("UPDATE tbl_conversations SET uniq_hash = ?, title = ?, id_last_message = ?, id_first_message = ?, id_status = ?, updated_at = ? WHERE id = ?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(c.UniqHash, c.Title, c.TokenConversation, c.IDLastMessage, c.IDFirstMessage, c.IDStatus, helpers.GetUtc(), c.ID)
+	_, err = stmt.Exec(c.UniqHash, c.Title, c.IDLastMessage, c.IDFirstMessage, c.IDStatus, helpers.GetUtc(), c.ID)
 	if err != nil {
 		return err
 	}
@@ -95,9 +94,9 @@ func (c *Conversation) Update() error {
 }
 
 // CreateConversation for insert a new conversation into the database
-func CreateConversation(uniqHash string, title string, tokenConversation string, IDLastMessage int, IDFirstMessage int, IDStatus int) (*Conversation, error) {
+func CreateConversation(uniqHash string, title string, IDLastMessage int, IDFirstMessage int, IDStatus int) (*Conversation, error) {
 	conversation := &Conversation{}
-	stmt, err := db.Prepare("INSERT INTO tbl_conversations(uniq_hash, title, token_conversation, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO tbl_conversations(uniq_hash, title, id_last_message, id_first_message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return conversation, err
 	}
@@ -105,7 +104,7 @@ func CreateConversation(uniqHash string, title string, tokenConversation string,
 
 	utc := helpers.GetUtc()
 
-	result, err := stmt.Exec(uniqHash, title, tokenConversation, IDLastMessage, IDFirstMessage, IDStatus, utc, utc)
+	result, err := stmt.Exec(uniqHash, title, IDLastMessage, IDFirstMessage, IDStatus, utc, utc)
 	if err != nil {
 		return conversation, err
 	}
