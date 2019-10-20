@@ -34,7 +34,7 @@ type Client struct {
 	account      *modelsv2.Account
 	conn         *websocket.Conn
 	send         chan []byte
-	target       int
+	target       []int
 	conversation *modelsv2.Conversation
 }
 
@@ -57,7 +57,9 @@ func (c *Client) readPump() {
 
 		message = action.NewMessage(c.account.ID, c.conversation.ID, string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))).Send()
 		c.send <- message
-		c.hub.disseminateToTheTarget <- &DisseminateToTheTarget{target: c.target, message: message}
+		for _, id := range c.target {
+			c.hub.disseminateToTheTarget <- &DisseminateToTheTarget{target: id, message: message}
+		}
 	}
 }
 
@@ -101,7 +103,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, account *modelsv2.Account, target int, conversation *modelsv2.Conversation, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub *Hub, account *modelsv2.Account, conversation *modelsv2.Conversation, target []int, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}

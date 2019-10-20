@@ -34,6 +34,23 @@ func FindRoom(id int) (*Room, error) {
 	return &room, nil
 }
 
+// FindRoomByToken for find one room by token
+func FindRoomByToken(token string) (*Room, error) {
+	room := Room{}
+	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms essages WHERE token = ? LIMIT 1", token)
+	if err != nil {
+		return &room, err
+	}
+	defer result.Close()
+	for result.Next() {
+		err := result.Scan(&room.ID, &room.IDConversation, &room.IDAccount, &room.Token, &room.CreatedAt, &room.UpdatedAt)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return &room, nil
+}
+
 // FindAllRooms for find all rooms in the database
 func FindAllRooms() ([]*Room, error) {
 	rooms := []*Room{}
@@ -74,6 +91,25 @@ func FindRoomByIDConversationAndIDAccount(IDConversation int, IDAccount int) (*R
 func FindAllRoomsByIDAccount(IDAccount int) ([]*Room, error) {
 	rooms := []*Room{}
 	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms WHERE id_account = ?", IDAccount)
+	if err != nil {
+		return rooms, err
+	}
+	defer result.Close()
+	for result.Next() {
+		room := Room{}
+		err := result.Scan(&room.ID, &room.IDConversation, &room.IDAccount, &room.Token, &room.CreatedAt, &room.UpdatedAt)
+		if err != nil {
+			panic(err.Error())
+		}
+		rooms = append(rooms, &room)
+	}
+	return rooms, nil
+}
+
+// FindAllRoomsByIDConversation for find all rooms by id_account in the database
+func FindAllRoomsByIDConversation(IDConversation int) ([]*Room, error) {
+	rooms := []*Room{}
+	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms WHERE id_conversation = ?", IDConversation)
 	if err != nil {
 		return rooms, err
 	}

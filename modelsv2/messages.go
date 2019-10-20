@@ -52,6 +52,25 @@ func FindAllMessage() ([]*Message, error) {
 	return messages, nil
 }
 
+// FindAllMessageByIDConversation for find all message in the database
+func FindAllMessageByIDConversation(IDConversation int) ([]*Message, error) {
+	messages := []*Message{}
+	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ?", IDConversation)
+	if err != nil {
+		return messages, err
+	}
+	defer result.Close()
+	for result.Next() {
+		message := Message{}
+		err := result.Scan(&message.ID, &message.IDAccount, &message.IDConversation, &message.Message, &message.IDStatus, &message.CreatedAt, &message.UpdatedAt)
+		if err != nil {
+			panic(err.Error())
+		}
+		messages = append(messages, &message)
+	}
+	return messages, nil
+}
+
 // Update a message
 func (m *Message) Update() error {
 	stmt, err := db.Prepare("UPDATE tbl_messages SET id_account = ?, id_conversation = ?, message = ?, id_status = ?, updated_at = ? WHERE id = ?")

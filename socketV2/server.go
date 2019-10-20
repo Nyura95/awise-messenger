@@ -25,8 +25,8 @@ const (
 
 type middleware struct {
 	account      *modelsv2.Account
-	target       int
 	conversation *modelsv2.Conversation
+	target       []int
 
 	auth bool
 	msg  string
@@ -41,7 +41,7 @@ func Start() {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/{token}/{target}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/{token}", func(w http.ResponseWriter, r *http.Request) {
 		pool := worker.CreateWorkerPool(checkAuth)
 		defer pool.Close()
 		middleware := pool.Process(r).(*middleware)
@@ -49,7 +49,7 @@ func Start() {
 			closeServeWs(middleware.msg, w, r)
 			return
 		}
-		serveWs(hub, middleware.account, middleware.target, middleware.conversation, w, r)
+		serveWs(hub, middleware.account, middleware.conversation, middleware.target, w, r)
 	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))
@@ -63,59 +63,52 @@ func checkAuth(payload interface{}) interface{} {
 	middleware := &middleware{auth: false}
 
 	token := mux.Vars(r)["token"]
-	target := mux.Vars(r)["target"]
 
-	if token == "" || target == "" {
+	if token == "" {
 		middleware.msg = queryEmpty
 		return middleware
 	}
 
-	accessToken, err := modelsv2.FindAccessTokenByToken(token)
-	if accessToken.ID == 0 || err != nil {
-		middleware.msg = authNotFound
-		return middleware
-	}
-	if accessToken.FlagDelete != 0 {
-		middleware.msg = tokenDelete
+	room, err := modelsv2.FindRoomByToken(token)
+	if err != nil {
+		middleware.msg = authNotFound // TMP
 		return middleware
 	}
 
-	if alive := Infos.alive(accessToken.IDAccount); alive == true {
+	if alive := Infos.alive(room.IDAccount); alive == true {
 		middleware.msg = userAlreadyConnected
 		return middleware
 	}
 
-	account, err := modelsv2.FindAccount(accessToken.IDAccount)
+	account, err := modelsv2.FindAccount(room.IDAccount)
 	if account.ID == 0 || err != nil {
 		middleware.msg = userNotFound
 		return middleware
 	}
 	middleware.account = account
 
-	idTarget, err := strconv.Atoi(target)
-	if err != nil {
-		middleware.msg = targetIsNotANumber
-		return middleware
-	}
-	accountTarget, err := modelsv2.FindAccount(idTarget)
-	if accountTarget.ID == 0 || err != nil {
-		middleware.msg = targetNotFound
-		return middleware
-	}
-	middleware.target = accountTarget.ID
-
-	if account.ID == accountTarget.ID {
-		middleware.msg = tagetIsUser
-		return middleware
-	}
-
-	conversation, err := modelsv2.FindConversationBetweenTwoAccount(account.ID, accountTarget.ID)
+	conversation, err := modelsv2.FindConversation(room.IDConversation)
 	if err != nil {
 		middleware.msg = conversationNotFound
 		return middleware
 	}
 
 	middleware.conversation = conversation
+
+	rooms, err := modelsv2.FindAllRoomsByIDConversation(conversation.ID)
+	if err != nil {
+		middleware.msg = conversationNotFound // TPM
+		return middleware
+	}
+
+	var target []int
+	for _, room := range rooms {
+		if room.IDAccount != account.ID {
+			target = append(target, room.IDAccount)
+		}
+	}
+
+	middleware.target = target
 	middleware.auth = true
 
 	return middleware

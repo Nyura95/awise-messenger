@@ -15,7 +15,8 @@ import (
 
 type conversationWithToken struct {
 	*modelsv2.Conversation
-	Token string
+	Token    string
+	Messages []*modelsv2.Message
 }
 
 // GetConversationWithATarget get or create a conversation with a other account
@@ -76,11 +77,18 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 	room, err := modelsv2.FindRoomByIDConversationAndIDAccount(conversation.ID, IDUser)
 	if err != nil {
 		log.Printf("Error when getting the room for the token")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2))
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room for the token", -2))
 		return
 	}
 
-	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Token: room.Token}, "ok", 1))
+	messages, err := modelsv2.FindAllMessageByIDConversation(conversation.ID)
+	if err != nil {
+		log.Printf("Error when getting the messages")
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the messages", -2))
+		return
+	}
+
+	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Messages: messages, Token: room.Token}, "ok", 1))
 }
 
 func getAccount(ID int, job chan *modelsv2.Account) {
