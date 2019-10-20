@@ -25,7 +25,7 @@
     </div>
     <div class="col-12 mt-4">
       <div class="row" v-for="(message, key) in messages" :key="key">
-        <div class="col-2">{{message.IDAccount}}:</div>
+        <div class="col-2">{{accounts[message.IDAccount]}}:</div>
         <div class="col-10">{{message.Message}}</div>
       </div>
     </div>
@@ -33,11 +33,14 @@
 </template>
 
 <script>
+import { fetch } from "../../plugings/request";
 export default {
   name: "Room",
   props: {
     name: String,
-    token: String
+    token: String,
+    target: Number,
+    tokenApi: String
   },
   mounted: function() {
     if ("Notification" in window) {
@@ -67,6 +70,7 @@ export default {
       socket: null,
       message: "",
       messages: [],
+      accounts: {},
       open: false,
       error: false
     };
@@ -79,6 +83,23 @@ export default {
       this.socket.close();
       this.socket = null;
     },
+    chargeMessage() {
+      fetch(
+        "/api/v2/conversations/target/" + this.target,
+        "get",
+        {},
+        {
+          Authorization: this.tokenApi
+        }
+      ).then(result => {
+        this.messages = result.Data.Messages;
+        for (let i = 0; i < result.Data.Accounts.length; i++) {
+          this.accounts[result.Data.Accounts[i].ID] =
+            result.Data.Accounts[i].Firstname;
+        }
+        console.log(result);
+      });
+    },
     start() {
       this.error = false;
       if (this.socket) {
@@ -88,11 +109,13 @@ export default {
 
       this.socket.onopen = () => {
         this.log("onopen");
+        this.chargeMessage();
         this.open = true;
       };
 
       this.socket.onclose = evt => {
         this.log("close");
+        this.messages = [];
         this.open = false;
       };
 
@@ -126,6 +149,7 @@ export default {
       };
       this.socket.onerror = err => {
         this.log(err);
+        this.messages = [];
         this.error = true;
       };
     },

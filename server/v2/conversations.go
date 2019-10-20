@@ -17,6 +17,7 @@ type conversationWithToken struct {
 	*modelsv2.Conversation
 	Token    string
 	Messages []*modelsv2.Message
+	Accounts [2]*modelsv2.Account
 }
 
 // GetConversationWithATarget get or create a conversation with a other account
@@ -88,7 +89,11 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Messages: messages, Token: room.Token}, "ok", 1))
+	var accounts [2]*modelsv2.Account
+	accounts[0] = account1
+	accounts[1] = account2
+
+	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1))
 }
 
 func getAccount(ID int, job chan *modelsv2.Account) {
