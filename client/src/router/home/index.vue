@@ -2,10 +2,22 @@
   <Layout>
     <div class="row">
       <div class="col-5 mx-auto room">
-        <Room name="Alexis" token="j_MuTU05PMBfh_A5t6077B4R5tw=" tokenApi="token1" :target="2" />
+        <Room
+          name="Alexis"
+          token="j_MuTU05PMBfh_A5t6077B4R5tw="
+          tokenApi="token1"
+          :target="2"
+          :id="1"
+        />
       </div>
       <div class="col-5 mx-auto room">
-        <Room name="Valentin" token="1ouZBXoXyqX7iyW3m2BH1O7Xakk=" tokenApi="token2" :target="1" />
+        <Room
+          name="Valentin"
+          token="1ouZBXoXyqX7iyW3m2BH1O7Xakk="
+          tokenApi="token2"
+          :target="1"
+          :id="2"
+        />
       </div>
     </div>
   </Layout>

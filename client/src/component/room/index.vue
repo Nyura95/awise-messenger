@@ -25,8 +25,11 @@
     </div>
     <div class="col-12 mt-4">
       <div class="row" v-for="(message, key) in messages" :key="key">
-        <div class="col-2">{{accounts[message.IDAccount]}}:</div>
-        <div class="col-10">{{message.Message}}</div>
+        <div class="col-2" v-if="message.IDAccount === id">{{accounts[message.IDAccount]}}:</div>
+        <div class="col-10" v-if="message.IDAccount === id">{{message.Message}}</div>
+
+        <div class="col-10 text-right" v-if="message.IDAccount !== id">{{message.Message}}</div>
+        <div class="col-2" v-if="message.IDAccount !== id">:{{accounts[message.IDAccount]}}</div>
       </div>
     </div>
   </div>
@@ -38,6 +41,7 @@ export default {
   name: "Room",
   props: {
     name: String,
+    id: Number,
     token: String,
     target: Number,
     tokenApi: String
@@ -161,4 +165,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.left {
+}
 </style>
