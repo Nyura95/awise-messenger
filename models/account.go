@@ -1,4 +1,4 @@
-package modelsv2
+package models
 
 import (
 	"crypto/md5"

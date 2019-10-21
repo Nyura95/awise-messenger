@@ -1,8 +1,8 @@
-package socketv2
+package socket
 
 import (
-	"awise-messenger/modelsv2"
-	"awise-messenger/socketV2/action"
+	"awise-messenger/models"
+	"awise-messenger/socket/action"
 	"bytes"
 	"log"
 	"net/http"
@@ -31,11 +31,11 @@ var upgrader = websocket.Upgrader{
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub          *Hub
-	account      *modelsv2.Account
+	account      *models.Account
 	conn         *websocket.Conn
 	send         chan []byte
 	target       []int
-	conversation *modelsv2.Conversation
+	conversation *models.Conversation
 }
 
 func (c *Client) readPump() {
@@ -103,7 +103,7 @@ func (c *Client) writePump() {
 	}
 }
 
-func serveWs(hub *Hub, account *modelsv2.Account, conversation *modelsv2.Conversation, target []int, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub *Hub, account *models.Account, conversation *models.Conversation, target []int, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}

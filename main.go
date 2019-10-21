@@ -2,9 +2,9 @@ package main
 
 import (
 	"awise-messenger/config"
-	"awise-messenger/modelsv2"
+	"awise-messenger/models"
 	"awise-messenger/server"
-	"awise-messenger/socketv2"
+	"awise-messenger/socket"
 )
 
 func main() {
@@ -12,12 +12,12 @@ func main() {
 	config.Start("dev")
 	configuration, _ := config.GetConfig()
 	// Instanciation du pool mysql
-	modelsv2.InitDb(configuration.User, configuration.Password, configuration.Host, configuration.Database)
-	defer modelsv2.Close()
+	models.InitDb(configuration.User, configuration.Password, configuration.Host, configuration.Database)
+	defer models.Close()
 
 	// Lancement du serveur http
 	go server.Start()
 
 	// socket.Start()
-	socketv2.Start()
+	socket.Start()
 }

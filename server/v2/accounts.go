@@ -1,9 +1,9 @@
 package v2
 
 import (
-	"awise-messenger/modelsv2"
+	"awise-messenger/models"
 	"awise-messenger/server/response"
-	"awise-messenger/socketv2"
+	"awise-messenger/socket"
 	"awise-messenger/worker"
 	"encoding/json"
 	"log"
@@ -11,13 +11,13 @@ import (
 )
 
 type onlineAccount struct {
-	modelsv2.Account
+	models.Account
 	Online bool
 }
 
 // GetAccounts with the status of the connection socket
 func GetAccounts(w http.ResponseWriter, r *http.Request) {
-	accounts, err := modelsv2.FindAllAccount()
+	accounts, err := models.FindAllAccount()
 	if err != nil {
 		log.Println("Error when getting the users in the database")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error database", -1))
@@ -30,13 +30,13 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 // check if the accounts passed is alive now from the socket and return a interface
 func getAccountOnline(payload interface{}) interface{} {
-	accounts := payload.([]*modelsv2.Account)
+	accounts := payload.([]*models.Account)
 
 	onlineAccounts := []*onlineAccount{}
 
 	for _, account := range accounts {
 		online := false
-		for _, id := range socketv2.Infos.List {
+		for _, id := range socket.Infos.List {
 			if account.ID == id {
 				online = true
 			}

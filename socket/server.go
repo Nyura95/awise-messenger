@@ -2,109 +2,114 @@ package socket
 
 import (
 	"awise-messenger/config"
-	"encoding/json"
+	"awise-messenger/models"
+	"awise-messenger/worker"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/net/websocket"
 )
 
-// Transactionnal return
-type Transactionnal struct {
-	Action  string
-	Success bool
-	Comment string
-	Data    string
-}
+const (
+	queryEmpty           = "query is empty"
+	tokenDelete          = "this token is delete"
+	authNotFound         = "auth does not found"
+	userAlreadyConnected = "user already connected"
+	userNotFound         = "user not found"
+	targetNotFound       = "target not found"
+	targetIsNotANumber   = "target is not a number"
+	tagetIsUser          = "target is the user"
+	conversationNotFound = "Conversation not found"
+)
 
-type targetConversation struct {
-	ID int
-}
+type middleware struct {
+	account      *models.Account
+	conversation *models.Conversation
+	target       []int
 
-func handler(ws *websocket.Conn) {
-	var err error
-
-	customer := Customer{Ws: ws}
-	log.Println("New")
-
-	for {
-		var transactionnal Transactionnal
-		if err = decryptMessage(ws, &transactionnal); err != nil {
-			log.Println("Error: Parsing error")
-			customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error parsing", Success: false, Data: "{}"})
-			break
-		}
-
-		log.Println(transactionnal)
-		if transactionnal.Action != "onload" && customer.Info.Token == "" {
-			log.Println("Error: You are not initialize")
-			customer.sendMessage(Transactionnal{Action: "Error", Comment: "You are not initialize", Success: false, Data: "{}"})
-			break
-		}
-
-		switch transactionnal.Action {
-		case "onload":
-			if err := onLoad(transactionnal, &customer); err != nil {
-				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
-			}
-			target, err := json.Marshal(targetConversation{ID: customer.Info.ConversationID})
-			if err != nil {
-				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
-				break
-			}
-			customer.sendMessage(Transactionnal{Action: "newTargetConversation", Success: true, Data: string(target)})
-			break
-		case "onclose":
-			customer.sendMessage(Transactionnal{Action: "close", Success: true, Data: "{}"})
-			if err := onClose(&customer); err != nil {
-				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
-			}
-			return
-		case "onread":
-			if err := onRead(&customer); err != nil {
-				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
-			}
-			break
-		case "send":
-			newMessage, err := onSend(transactionnal, &customer)
-			if err != nil {
-				log.Printf("Error: %s", err.Error())
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: err.Error(), Success: false, Data: "{}"})
-				break
-			}
-			data, err := json.Marshal(newMessage)
-			if err != nil {
-				customer.sendMessage(Transactionnal{Action: "Error", Comment: "Error convert message", Success: false, Data: "{}"})
-				break
-			}
-
-			customer.sendMessageToCustomer(customer.Info.UserID, Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
-			log.Printf("check if target %d is online", customer.Info.TargetID)
-			if target := getCustomerByID(customer.Info.TargetID); target != nil {
-				log.Printf("Target find")
-				target.sendMessage(Transactionnal{Action: "newMessage", Success: true, Data: string(data)})
-			}
-			break
-		}
-	}
+	auth bool
+	msg  string
 }
 
 // Start the socket server
 func Start() {
 	config, _ := config.GetConfig()
-	Customers = make([]*Customer, 0)
+
+	hub := newHub()
+	go hub.run()
+
 	r := mux.NewRouter()
 
-	r.Handle("/", websocket.Handler(handler))
+	r.HandleFunc("/{token}", func(w http.ResponseWriter, r *http.Request) {
+		pool := worker.CreateWorkerPool(checkAuth)
+		defer pool.Close()
+		middleware := pool.Process(r).(*middleware)
+		if middleware.auth == false {
+			closeServeWs(middleware.msg, w, r)
+			return
+		}
+		serveWs(hub, middleware.account, middleware.conversation, middleware.target, w, r)
+	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))
 	if err := http.ListenAndServe("127.0.0.1:"+strconv.Itoa(config.SocketPort), r); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+}
+
+func checkAuth(payload interface{}) interface{} {
+	r := payload.(*http.Request)
+	middleware := &middleware{auth: false}
+
+	token := mux.Vars(r)["token"]
+
+	if token == "" {
+		middleware.msg = queryEmpty
+		return middleware
+	}
+
+	room, err := models.FindRoomByToken(token)
+	if err != nil {
+		middleware.msg = authNotFound // TMP
+		return middleware
+	}
+
+	if alive := Infos.alive(room.IDAccount); alive == true {
+		middleware.msg = userAlreadyConnected
+		return middleware
+	}
+
+	account, err := models.FindAccount(room.IDAccount)
+	if account.ID == 0 || err != nil {
+		middleware.msg = userNotFound
+		return middleware
+	}
+	middleware.account = account
+
+	conversation, err := models.FindConversation(room.IDConversation)
+	if err != nil {
+		middleware.msg = conversationNotFound
+		return middleware
+	}
+
+	middleware.conversation = conversation
+
+	rooms, err := models.FindAllRoomsByIDConversation(conversation.ID)
+	if err != nil {
+		middleware.msg = conversationNotFound // TPM
+		return middleware
+	}
+
+	var target []int
+	for _, room := range rooms {
+		if room.IDAccount != account.ID {
+			target = append(target, room.IDAccount)
+		}
+	}
+
+	middleware.target = target
+	middleware.auth = true
+
+	return middleware
 }

@@ -2,7 +2,7 @@ package v2
 
 import (
 	"awise-messenger/helpers"
-	"awise-messenger/modelsv2"
+	"awise-messenger/models"
 	"awise-messenger/server/response"
 	"encoding/json"
 	"log"
@@ -14,10 +14,10 @@ import (
 )
 
 type conversationWithToken struct {
-	*modelsv2.Conversation
+	*models.Conversation
 	Token    string
-	Messages []*modelsv2.Message
-	Accounts [2]*modelsv2.Account
+	Messages []*models.Message
+	Accounts [2]*models.Account
 }
 
 // GetConversationWithATarget get or create a conversation with a other account
@@ -37,7 +37,7 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jobs := make(chan *modelsv2.Account, 2)
+	jobs := make(chan *models.Account, 2)
 	go getAccount(IDUser, jobs)
 	go getAccount(IDTarget, jobs)
 
@@ -51,7 +51,7 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conversation, err := modelsv2.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
+	conversation, err := models.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
 	if err != nil {
 		log.Printf("Error when getting the room between the accounts")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2))
@@ -59,7 +59,7 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if conversation.ID == 0 {
-		jobs := make(chan *modelsv2.Conversation, 1)
+		jobs := make(chan *models.Conversation, 1)
 		go createNewConversation(account1, account2, jobs)
 		conversation = <-jobs
 		if conversation.ID == 0 {
@@ -75,35 +75,35 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	room, err := modelsv2.FindRoomByIDConversationAndIDAccount(conversation.ID, IDUser)
+	room, err := models.FindRoomByIDConversationAndIDAccount(conversation.ID, IDUser)
 	if err != nil {
 		log.Printf("Error when getting the room for the token")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room for the token", -2))
 		return
 	}
 
-	messages, err := modelsv2.FindAllMessageByIDConversation(conversation.ID)
+	messages, err := models.FindAllMessageByIDConversation(conversation.ID)
 	if err != nil {
 		log.Printf("Error when getting the messages")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the messages", -2))
 		return
 	}
 
-	var accounts [2]*modelsv2.Account
+	var accounts [2]*models.Account
 	accounts[0] = account1
 	accounts[1] = account2
 
 	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1))
 }
 
-func getAccount(ID int, job chan *modelsv2.Account) {
-	account, _ := modelsv2.FindAccount(ID)
+func getAccount(ID int, job chan *models.Account) {
+	account, _ := models.FindAccount(ID)
 	job <- account
 }
 
-func createNewConversation(account1 *modelsv2.Account, account2 *modelsv2.Account, create chan *modelsv2.Conversation) {
+func createNewConversation(account1 *models.Account, account2 *models.Account, create chan *models.Conversation) {
 	uniqHash := helpers.Uniqhash(account1.ID, account2.ID)
-	conversation, err := modelsv2.CreateConversation(uniqHash, "", 0, 0, 1)
+	conversation, err := models.CreateConversation(uniqHash, "", 0, 0, 1)
 	if err != nil {
 		log.Println(err)
 		create <- conversation
@@ -114,6 +114,6 @@ func createNewConversation(account1 *modelsv2.Account, account2 *modelsv2.Accoun
 		create <- conversation
 		return
 	}
-	modelsv2.CreateRoomForMultipleAccount(conversation.ID, account1.ID, account2.ID)
+	models.CreateRoomForMultipleAccount(conversation.ID, account1.ID, account2.ID)
 	create <- conversation
 }

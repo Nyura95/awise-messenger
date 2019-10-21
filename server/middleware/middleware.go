@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"awise-messenger/modelsv2"
+	"awise-messenger/models"
 	"log"
 	"net/http"
 
@@ -39,7 +39,7 @@ func IsGoodToken(next http.Handler) http.Handler {
 			return
 		}
 
-		accessToken, err := modelsv2.FindAccessTokenByToken(token)
+		accessToken, err := models.FindAccessTokenByToken(token)
 		if accessToken.ID == 0 || err != nil {
 			log.Println("auth does not found")
 			http.Error(w, "Not authorized", 401)

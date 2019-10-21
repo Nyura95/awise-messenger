@@ -1,7 +1,7 @@
-package socketv2
+package socket
 
 import (
-	"awise-messenger/socketV2/action"
+	"awise-messenger/socket/action"
 	"log"
 )
 

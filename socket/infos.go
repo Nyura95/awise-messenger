@@ -1,4 +1,4 @@
-package socketv2
+package socket
 
 type info struct {
 	List []int

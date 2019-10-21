@@ -1,7 +1,7 @@
 package action
 
 import (
-	"awise-messenger/modelsv2"
+	"awise-messenger/models"
 	"encoding/json"
 )
 
@@ -9,12 +9,12 @@ import (
 type Message struct {
 	Action  string
 	IDUser  int
-	Message *modelsv2.Message
+	Message *models.Message
 }
 
 // NewMessage create a new instance of message
 func NewMessage(IDUser int, IDConversation int, msg string) *Message {
-	message, err := modelsv2.CreateMessage(IDUser, IDConversation, msg, 1)
+	message, err := models.CreateMessage(IDUser, IDConversation, msg, 1)
 	if err != nil {
 		return &Message{}
 	}
