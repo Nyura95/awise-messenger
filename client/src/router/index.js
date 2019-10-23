@@ -3,6 +3,8 @@ import VueRouter from 'vue-router';
 
 import Home from './home';
 import Login from './login';
+import VueChatScroll from 'vue-chat-scroll'
+Vue.use(VueChatScroll)
 
 Vue.use(VueRouter);
 

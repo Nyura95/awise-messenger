@@ -18,24 +18,37 @@
       />
     </div>
     <div class="text-danger" v-if="error">Une erreur est survenu !</div>
+
+    <div class="col-12 mt-4">
+      <div class="scroll" v-chat-scroll="{always: false, smooth: true}">
+        <div class="row mt-2 mb-2 container_message" v-for="(message, key) in messages" :key="key">
+          <div class="col-12" v-if="message.IDAccount === id">
+            <div class="row">
+              <div class="col-auto message">
+                <span>{{message.Message}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-12" v-if="message.IDAccount !== id">
+            <div class="row">
+              <div class="col-auto left message target">
+                <span>{{message.Message}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="col-12 mt-4">
       message :
       <input v-model="message" type="text" @keyup.enter="sendMessage" />
       <input type="button" @click="sendMessage" value="submit" />
     </div>
-    <div class="col-12 mt-4">
-      <div class="row" v-for="(message, key) in messages" :key="key">
-        <div class="col-2" v-if="message.IDAccount === id">{{accounts[message.IDAccount]}}:</div>
-        <div class="col-10" v-if="message.IDAccount === id">{{message.Message}}</div>
-
-        <div class="col-10 text-right" v-if="message.IDAccount !== id">{{message.Message}}</div>
-        <div class="col-2" v-if="message.IDAccount !== id">:{{accounts[message.IDAccount]}}</div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
+// accounts[message.IDAccount]
 import { fetch } from "../../plugings/request";
 export default {
   name: "Room",
@@ -84,8 +97,10 @@ export default {
       this.socket.send(this.message);
     },
     close() {
-      this.socket.close();
-      this.socket = null;
+      if (this.socket) {
+        this.socket.close();
+        this.socket = null;
+      }
     },
     chargeMessage() {
       fetch(
@@ -166,5 +181,42 @@ export default {
 
 <style lang="scss" scoped>
 .left {
+  margin-left: auto;
+}
+
+.scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 150;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+
+.container_message {
+  padding-left: 30px;
+  padding-right: 30px;
+  .message {
+    padding: 5px;
+    border-bottom-left-radius: 48px;
+    border-top-left-radius: 48px;
+    border-top-right-radius: 48px;
+    border-bottom-right-radius: 48px;
+    background-color: #3578e5;
+  }
+
+  .message span {
+    margin-left: 5px;
+    margin-right: 5px;
+    color: white;
+    font-weight: 500;
+  }
+
+  .target {
+    background-color: lightgray;
+  }
+  .target span {
+    color: black;
+  }
 }
 </style>
