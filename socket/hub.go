@@ -52,8 +52,10 @@ func (h *Hub) run() {
 			log.Printf("New client register %s (%d) alive now : %d", client.account.Firstname, client.account.ID, Infos.nbAlive())
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
+
 				delete(h.clients, client)
 				close(client.send)
+
 				Infos.del(client.account.ID)
 				for other := range h.clients {
 					other.send <- action.NewDisconnection(client.account.ID).Send()

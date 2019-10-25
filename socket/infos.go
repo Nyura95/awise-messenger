@@ -15,6 +15,7 @@ func (i *info) del(id int) {
 	for index, idAccount := range i.List {
 		if idAccount == id {
 			i.List = append(i.List[:index], i.List[index+1:]...)
+			break
 		}
 	}
 }

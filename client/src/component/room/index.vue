@@ -125,7 +125,6 @@ export default {
         this.socket.close();
       }
       this.socket = new WebSocket(`ws://localhost:3001/${this.token}`);
-
       this.socket.onopen = () => {
         this.log("onopen");
         this.chargeMessage();
