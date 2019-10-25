@@ -4,9 +4,9 @@ export const production = {
   reduxLog: false,
   i18n: {
     defaultLang: 'en',
-    storeName: 'lang'
+    storeName: 'lang',
   },
   api: {
-    basepath: 'http://localhost:8080'
-  }
+    basepath: 'http://localhost:3000',
+  },
 };

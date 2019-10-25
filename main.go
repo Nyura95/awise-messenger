@@ -5,19 +5,24 @@ import (
 	"awise-messenger/models"
 	"awise-messenger/server"
 	"awise-messenger/socket"
+	"awise-messenger/static"
 )
 
 func main() {
-	// Instanciation de la configuration
+	// Init of the config
 	config.Start("dev")
 	configuration, _ := config.GetConfig()
-	// Instanciation du pool mysql
+	// Init of the pool mysql
 	models.InitDb(configuration.User, configuration.Password, configuration.Host, configuration.Database)
 	defer models.Close()
 
-	// Lancement du serveur http
+	// Launch of the http server
 	go server.Start()
 
-	// socket.Start()
+	// Launch of the static server for the front
+	go static.Start()
+
+	// Launch of the socket server
 	socket.Start()
+
 }

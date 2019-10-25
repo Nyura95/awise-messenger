@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -27,17 +28,6 @@ func Start() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.IsGoodToken)
 
-	// // Get or Create a conversation with one target
-	// r.HandleFunc("/api/v1/conversation/target/{id}", v1.GetConvoByTarget).Methods("GET")
-	// // Get or Create a conversation with one target
-	// r.HandleFunc("/api/v1/conversation/{id}", v1.GetConvoByID).Methods("GET")
-	// // Get all conversation for the user
-	// r.HandleFunc("/api/v1/conversation", v1.GetAllConvo).Methods("GET")
-	// // Get info user
-	// r.HandleFunc("/api/v1/info", v1.GetInfo).Methods("GET")
-	// // Get all users
-	// r.HandleFunc("/api/v1/users", v1.GetAllUser).Methods("GET")
-
 	r.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
 
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
@@ -46,5 +36,11 @@ func Start() {
 	r.HandleFunc("/", nil).Methods("OPTIONS")
 
 	log.Println("Start http server on localhost:" + strconv.Itoa(config.Port))
-	http.ListenAndServe("127.0.0.1:"+strconv.Itoa(config.Port), handlers.CORS(originsOk, headersOk, methodsOk)(r))
+	srv := &http.Server{
+		Handler:      handlers.CORS(originsOk, headersOk, methodsOk)(r),
+		Addr:         "127.0.0.1:" + strconv.Itoa(config.Port),
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+	srv.ListenAndServe()
 }

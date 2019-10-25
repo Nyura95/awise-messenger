@@ -21,6 +21,7 @@ const (
 	targetIsNotANumber   = "target is not a number"
 	tagetIsUser          = "target is the user"
 	conversationNotFound = "Conversation not found"
+	roundNotFound        = "Round not found"
 )
 
 type middleware struct {
@@ -71,13 +72,13 @@ func checkAuth(payload interface{}) interface{} {
 
 	room, err := models.FindRoomByToken(token)
 	if err != nil {
-		middleware.msg = authNotFound // TMP
+		middleware.msg = roundNotFound
 		return middleware
 	}
 
 	if alive := Infos.alive(room.IDAccount); alive == true {
-		middleware.msg = userAlreadyConnected
-		return middleware
+		// middleware.msg = userAlreadyConnected
+		// return middleware
 	}
 
 	account, err := models.FindAccount(room.IDAccount)

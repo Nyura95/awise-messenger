@@ -4,5 +4,6 @@
   "Password": "Yfful95df",
   "Database": "MESSENGER",
   "Port": 3000,
-  "SocketPort": 3001
+  "SocketPort": 3001,
+  "StaticPort": 8080
 }

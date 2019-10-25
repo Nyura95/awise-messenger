@@ -14,6 +14,7 @@ type Config struct {
 	Database   string
 	Port       int
 	SocketPort int
+	StaticPort int
 }
 
 var config Config

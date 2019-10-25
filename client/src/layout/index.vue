@@ -13,9 +13,12 @@
             <!-- <img :src="user.Avatars" class="avatars" /> -->
             <Avatar :url="user.Avatars" :online="user.Online" />
           </div>
-          <!-- <router-link :to="{ name: 'home' }" active-class="active" class="nav-item" tag="li">
+          <router-link :to="{ name: 'home' }" active-class="active" class="nav-item" tag="li">
             <a class="nav-link">Home</a>
-          </router-link>-->
+          </router-link>
+          <router-link :to="{ name: 'login' }" active-class="active" class="nav-item" tag="li">
+            <a class="nav-link">Login</a>
+          </router-link>
         </ul>
         <span class="navbar-text">
           <a class="btn btn-secondary" href="#" @click.prevent="logout">
