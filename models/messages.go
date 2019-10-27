@@ -53,9 +53,9 @@ func FindAllMessage() ([]*Message, error) {
 }
 
 // FindAllMessageByIDConversation for find all message in the database
-func FindAllMessageByIDConversation(IDConversation int) ([]*Message, error) {
+func FindAllMessageByIDConversation(IDConversation int, limit int) ([]*Message, error) {
 	messages := []*Message{}
-	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ?", IDConversation)
+	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ?", IDConversation, limit)
 	if err != nil {
 		return messages, err
 	}

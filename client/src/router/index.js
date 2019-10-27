@@ -2,7 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import Home from './home';
-import Login from './login';
+import Multi from './multi';
 import VueChatScroll from 'vue-chat-scroll';
 Vue.use(VueChatScroll);
 
@@ -10,7 +10,7 @@ Vue.use(VueRouter);
 
 export const router = new VueRouter({
   mode: 'history',
-  routes: [{ path: '/', name: 'home', component: Home, meta: { requiresAuth: true } }, { path: '/login', name: 'login', component: Login }],
+  routes: [{ path: '/', name: 'home', component: Home, meta: { requiresAuth: true } }, { path: '/multi', name: 'multi', component: Multi }],
 });
 
 router.beforeEach((to, from, next) => {

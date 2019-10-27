@@ -10,14 +10,13 @@
       <div :class="{ show : menuCollapsed}" class="collapse navbar-collapse">
         <ul class="navbar-nav mr-auto">
           <div class="nav-item" v-for="user in users" :key="user.UserID">
-            <!-- <img :src="user.Avatars" class="avatars" /> -->
             <Avatar :url="user.Avatars" :online="user.Online" />
           </div>
           <router-link :to="{ name: 'home' }" active-class="active" class="nav-item" tag="li">
             <a class="nav-link">Home</a>
           </router-link>
-          <router-link :to="{ name: 'login' }" active-class="active" class="nav-item" tag="li">
-            <a class="nav-link">Login</a>
+          <router-link :to="{ name: 'multi' }" active-class="active" class="nav-item" tag="li">
+            <a class="nav-link">Multi</a>
           </router-link>
         </ul>
         <span class="navbar-text">

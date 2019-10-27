@@ -4,6 +4,7 @@ import (
 	"awise-messenger/helpers"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
+	"awise-messenger/worker"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -18,6 +19,11 @@ type conversationWithToken struct {
 	Token    string
 	Messages []*models.Message
 	Accounts [2]*models.Account
+}
+
+type getConversationWithATargetPayload struct {
+	IDUser   int
+	IDTarget int
 }
 
 // GetConversationWithATarget get or create a conversation with a other account
@@ -37,9 +43,17 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pool := worker.CreateWorkerPool(getConversationWithATargetWorker)
+	defer pool.Close()
+
+	json.NewEncoder(w).Encode(pool.Process(getConversationWithATargetPayload{IDUser: IDUser, IDTarget: IDTarget}))
+}
+
+func getConversationWithATargetWorker(payload interface{}) interface{} {
+	context := payload.(getConversationWithATargetPayload)
 	jobs := make(chan *models.Account, 2)
-	go getAccount(IDUser, jobs)
-	go getAccount(IDTarget, jobs)
+	go getAccount(context.IDUser, jobs)
+	go getAccount(context.IDTarget, jobs)
 
 	account1 := <-jobs
 	account2 := <-jobs
@@ -47,15 +61,13 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 
 	if account1.ID == 0 || account2.ID == 0 {
 		log.Printf("User or target does not exist")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "User or target does not exist", -2))
-		return
+		return response.BasicResponse(new(interface{}), "User or target does not exist", -2)
 	}
 
 	conversation, err := models.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
 	if err != nil {
 		log.Printf("Error when getting the room between the accounts")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2))
-		return
+		return response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2)
 	}
 
 	if conversation.ID == 0 {
@@ -64,36 +76,33 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		conversation = <-jobs
 		if conversation.ID == 0 {
 			log.Printf("Error when creating the conversation into the datatable")
-			json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2))
-			return
+			return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
 		}
 	} else {
 		if conversation.ID == 0 {
 			log.Printf("Error when creating the conversation into the datatable")
-			json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2))
-			return
+			return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
 		}
 	}
 
-	room, err := models.FindRoomByIDConversationAndIDAccount(conversation.ID, IDUser)
+	room, err := models.FindRoomByIDConversationAndIDAccount(conversation.ID, context.IDUser)
 	if err != nil {
 		log.Printf("Error when getting the room for the token")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the room for the token", -2))
-		return
+		return response.BasicResponse(new(interface{}), "Error when getting the room for the token", -2)
 	}
 
-	messages, err := models.FindAllMessageByIDConversation(conversation.ID)
+	messages, err := models.FindAllMessageByIDConversation(conversation.ID, 20)
 	if err != nil {
 		log.Printf("Error when getting the messages")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error when getting the messages", -2))
-		return
+		return response.BasicResponse(new(interface{}), "Error when getting the messages", -2)
 	}
+	reverse(messages)
 
 	var accounts [2]*models.Account
 	accounts[0] = account1
 	accounts[1] = account2
 
-	json.NewEncoder(w).Encode(response.BasicResponse(conversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1))
+	return response.BasicResponse(conversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1)
 }
 
 func getAccount(ID int, job chan *models.Account) {
@@ -116,4 +125,11 @@ func createNewConversation(account1 *models.Account, account2 *models.Account, c
 	}
 	models.CreateRoomForMultipleAccount(conversation.ID, account1.ID, account2.ID)
 	create <- conversation
+}
+
+func reverse(a []*models.Message) {
+	for i := len(a)/2 - 1; i >= 0; i-- {
+		opp := len(a) - 1 - i
+		a[i], a[opp] = a[opp], a[i]
+	}
 }
