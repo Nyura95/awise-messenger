@@ -1,19 +1,12 @@
 /**
- * @typedef {Object} Transactionnal
- * @property {string} Action Name of action
- * @property {boolean} Success If this action is successful
- * @property {string} Comment Comment on this action
- * @property {object} Data Any data on this action
- */
-
-/**
  * Awise socket client
  * @param {string} uri
  * @version 1.0.0
  * @example AwiseSocket('wss://messenger.awise.co')
  * @author Nyura95
+ *
  */
-function AwiseSocket(uri) {
+function AwiseSocket(uri, logger = true) {
   if (typeof uri !== 'string' && (uri.indexOf('ws://') === -1 || uri.indexOf('wss://') === -1)) {
     throw 'This uri is not correct, you must pass a ws or wss uniform resource identifier';
   }
@@ -21,59 +14,62 @@ function AwiseSocket(uri) {
     value: uri,
     writable: false,
   });
-  this._targetConversation = null;
+  this._tokenConversation = null;
   this.webSocket = null;
+  this.logger = logger;
   this.onerror = function() {};
   this.onclose = function() {};
-  this.onmessage = function() {};
+
+  // private action
+  this.message = function() {};
+  this.connection = function() {};
+  this.disconnection = function() {};
+  this.error = function() {};
 }
 
 /**
- * Initialize a new connexion with the server
+ * Initialize a new connexion with a conversation
+ * @param {string} token
  * @param {function} callback
  * @version 1.0.0
  * @returns {void}
  * @author Nyura95
  */
-AwiseSocket.prototype.init = function(callback) {
+AwiseSocket.prototype.initConversation = function(token, callback) {
   if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
-    console.warn('You have already a connexion openned, close this connexion before starting a new one');
-    return;
+    this.close();
   }
-  this.webSocket = new WebSocket(this._uri);
-  if (this.webSocket) {
-    this.webSocket.onerror = function(event) {
-      this.onerror ? this.onerror(event) : null;
-    }.bind(this);
-    this.webSocket.onclose = function(event) {
-      this.onclose ? this.onclose(event) : null;
-    }.bind(this);
-    this.webSocket.onmessage = function(event) {
-      var reveiveMessage = decryptMessage(event.data);
-      if (reveiveMessage.Action === 'newTargetConversation' && reveiveMessage.Data.ID) this._targetConversation = reveiveMessage.Data.ID;
-      if (reveiveMessage.Action === 'close') this._targetConversation = null;
-      this.onmessage ? this.onmessage(reveiveMessage) : null;
-    }.bind(this);
-    this.webSocket.onopen = function() {
-      callback();
-    };
-  }
-};
-
-/**
- *
- * Go to conversation
- * @param {string} token
- * @version 1.0.0
- * @returns {void}
- * @author Nyura95
- */
-AwiseSocket.prototype.toConversation = function(token) {
-  if (this.webSocket.readyState !== WebSocket.OPEN) {
-    console.warn('Init a new connexion before target a conversation');
-    return;
-  }
-  this.webSocket ? this.webSocket.send(encryptMessage({ action: 'onload', data: { token } })) : null;
+  this._tokenConversation = token;
+  this._log('init conversation');
+  this.webSocket = new WebSocket(this._uri + '/' + this._tokenConversation);
+  this.webSocket.onopen = function() {
+    callback();
+  };
+  this.webSocket.onerror = function(event) {
+    this.onerror ? this.onerror(event) : null;
+  }.bind(this);
+  this.webSocket.onclose = function(event) {
+    this.onclose ? this.onclose(event) : null;
+  }.bind(this);
+  this.webSocket.onmessage = function(event) {
+    var messages = event.data.split('\n');
+    for (let i = 0; i < messages.length; i++) {
+      var message = JSON.parse(messages[i]);
+      this._log('new message receive (' + message.Action + ')');
+      if (message.Action === 'Message') {
+        this.message ? this.message(message.Message) : null;
+      }
+      if (message.Action === 'Connection') {
+        this.connection ? this.connection(message.User) : null;
+      }
+      if (message.Action === 'Disconnection') {
+        this.disconnection ? this.disconnection(message.User) : null;
+      }
+      if (message.Action === 'Error') {
+        this.error ? this.error(message.LocKey, message.Message) : null;
+      }
+    }
+  }.bind(this);
 };
 
 /**
@@ -84,40 +80,13 @@ AwiseSocket.prototype.toConversation = function(token) {
  * @returns {void}
  * @author Nyura95
  */
-AwiseSocket.prototype.sendMessage = function(message) {
-  if (!this._targetConversation && typeof this._targetConversation !== 'number') {
-    console.warn('You must target a conversation (use toConversation)');
+AwiseSocket.prototype.send = function(message) {
+  if (!this._tokenConversation && typeof this._tokenConversation !== 'number') {
+    console.warn('You must target a conversation (use initConversation)');
     return;
   }
-  this.webSocket ? this.webSocket.send(encryptMessage({ action: 'send', data: { message } })) : null;
-};
-
-/**
- *
- * Go to conversation
- * @param {string} token
- * @version 1.0.0
- * @returns {void}
- * @author Nyura95
- */
-AwiseSocket.prototype.readMessage = function() {
-  if (!this._targetConversation && typeof this._targetConversation !== 'number') {
-    console.warn('You must target a conversation (use toConversation)');
-    return;
-  }
-  this.webSocket ? this.webSocket.send(encryptMessage({ action: 'onread', data: {} })) : null;
-};
-
-/**
- * Send a new message to the server
- * @param {string} action
- * @param {object} data
- * @version 1.0.0
- * @returns {void}
- * @author Nyura95
- */
-AwiseSocket.prototype._send = function(action, data) {
-  this.webSocket ? this.webSocket.send(encryptMessage({ action, data })) : null;
+  this._log('send message : (' + message + ')');
+  this.webSocket ? this.webSocket.send(message) : null;
 };
 
 /**
@@ -127,47 +96,17 @@ AwiseSocket.prototype._send = function(action, data) {
  * @author Nyura95
  */
 AwiseSocket.prototype.close = function() {
-  this.webSocket.send(encryptMessage({ action: 'onclose' }));
+  this._log('close');
+  this.webSocket.close(1000, 'close user');
+  this.webSocket = null;
 };
 
-/**
- * Analyze the server message and convert it
- * @param {string} message
- * @version 1.0.0
- * @returns {Transactionnal}
- * @author Nyura95
- */
-function decryptMessage(message) {
-  var obj = {};
-  var data = {};
-  try {
-    obj = JSON.parse(message);
-    data = JSON.parse(obj.Data);
-  } catch (err) {
-    console.trace(err);
-    throw 'Error with the message from the server';
+AwiseSocket.prototype._log = function(...messages) {
+  if (console) {
+    console.log(`[${this._tokenConversation || 'noToken'}]:`, ...messages);
   }
-  obj.Data = data;
-  return obj;
-}
-
-/**
- * Analyze the server message and convert it
- * @param {object} massage
- * @version 1.0.0
- * @returns {string}
- * @author Nyura95
- */
-function encryptMessage(message) {
-  if (typeof message === 'object' && !Array.isArray(message)) {
-    try {
-      message.data = JSON.stringify(message.data);
-      return JSON.stringify(message);
-    } catch (err) {
-      console.trace(err);
-      throw 'Error with the message for the server';
-    }
-  }
-}
+};
 
 module.exports = AwiseSocket;
+
+/// <reference path=”./index.d.ts” />

@@ -43,14 +43,14 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pool := worker.CreateWorkerPool(getConversationWithATargetWorker)
+	pool := worker.CreateWorkerPool(getConversationWithATarget)
 	defer pool.Close()
-
 	json.NewEncoder(w).Encode(pool.Process(getConversationWithATargetPayload{IDUser: IDUser, IDTarget: IDTarget}))
 }
 
-func getConversationWithATargetWorker(payload interface{}) interface{} {
+func getConversationWithATarget(payload interface{}) interface{} {
 	context := payload.(getConversationWithATargetPayload)
+
 	jobs := make(chan *models.Account, 2)
 	go getAccount(context.IDUser, jobs)
 	go getAccount(context.IDTarget, jobs)
@@ -71,18 +71,21 @@ func getConversationWithATargetWorker(payload interface{}) interface{} {
 	}
 
 	if conversation.ID == 0 {
-		jobs := make(chan *models.Conversation, 1)
-		go createNewConversation(account1, account2, jobs)
-		conversation = <-jobs
-		if conversation.ID == 0 {
-			log.Printf("Error when creating the conversation into the datatable")
+		conversation, err := models.CreateConversation(helpers.Uniqhash(account1.ID, account2.ID), "", 0, 0, 1)
+		if err != nil || conversation.ID == 0 {
+			log.Println(err)
 			return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
 		}
-	} else {
-		if conversation.ID == 0 {
-			log.Printf("Error when creating the conversation into the datatable")
-			return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
+		err = models.CreateRoomForMultipleAccount(conversation.ID, account1.ID, account2.ID)
+		if err != nil {
+			log.Println(err)
+			return response.BasicResponse(new(interface{}), "Error when creating the rooms into the datatable", -2)
 		}
+	}
+
+	if conversation.ID == 0 {
+		log.Printf("Error when creating the conversation into the datatable")
+		return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
 	}
 
 	room, err := models.FindRoomByIDConversationAndIDAccount(conversation.ID, context.IDUser)

@@ -50,6 +50,7 @@
 <script>
 // accounts[message.IDAccount]
 import { fetch } from "../../plugings/request";
+import AwiseSocket from "../../plugings/socket/index";
 export default {
   name: "Room",
   props: {
@@ -124,55 +125,49 @@ export default {
       if (this.socket) {
         this.socket.close();
       }
-      this.socket = new WebSocket(`ws://localhost:3001/${this.token}`);
-      this.socket.onopen = () => {
-        this.log("onopen");
-        this.chargeMessage();
-        this.open = true;
-      };
 
-      this.socket.onclose = evt => {
-        this.log("close");
+      this.socket = new AwiseSocket("ws://localhost:3001");
+
+      this.socket.onclose = () => {
         this.messages = [];
         this.open = false;
       };
 
-      this.socket.onmessage = evt => {
-        const messages = evt.data.split("\n");
-        for (let i = 0; i < messages.length; i++) {
-          const message = JSON.parse(messages[i]);
-          this.log(messages[i]);
-          if (message.Action === "Message") {
-            this.message = "";
-            this.messages.push(message.Message);
-          }
-          if (message.Action === "Connection") {
-            new Notification("Nouvelle connexion", {
-              body: `l'utilisateur ${message.User} vient de se connecter`,
-              lang: "FR",
-              tag: new Date()
-            });
-          }
-          if (message.Action === "Disconnection") {
-            new Notification("Déconnection", {
-              body: `l'utilisateur ${message.User} vient de se déconnecter`,
-              lang: "FR",
-              tag: new Date()
-            });
-          }
-          if (message.Action === "Error") {
-            this.error = true;
-          }
-        }
-      };
       this.socket.onerror = err => {
-        this.log(err);
+        console.log(err);
         this.messages = [];
         this.error = true;
       };
-    },
-    log(...messages) {
-      console.log(`${this.name}:`, ...messages);
+
+      this.socket.message = message => {
+        this.message = "";
+        this.messages.push(message);
+      };
+
+      this.socket.connection = user => {
+        new Notification("Nouvelle connexion", {
+          body: `l'utilisateur ${user} vient de se connecter`,
+          lang: "FR",
+          tag: new Date()
+        });
+      };
+
+      this.socket.disconnection = user => {
+        new Notification("Déconnection", {
+          body: `l'utilisateur ${user} vient de se déconnecter`,
+          lang: "FR",
+          tag: new Date()
+        });
+      };
+
+      this.socket.error = (lockey, message) => {
+        this.error = true;
+      };
+
+      this.socket.initConversation(this.token, () => {
+        this.chargeMessage();
+        this.open = true;
+      });
     }
   }
 };
