@@ -2,7 +2,6 @@ package models
 
 import (
 	"awise-messenger/helpers"
-	"log"
 	"time"
 )
 
@@ -61,15 +60,15 @@ func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Me
 
 	nbMaxPage := count / nb
 
+	if page == 0 {
+		page = 1
+	}
 	if page > nbMaxPage {
 		page = nbMaxPage
 	}
 
-	log.Println(nbMaxPage)
-
 	messages := []*Message{}
-	log.Printf("%d et %d", page*nb-nb+1, page*nb-1)
-	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ?, ?", IDConversation, page*nb-nb+1, page*nb-1)
+	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ? OFFSET ?", IDConversation, nb, page*nb-nb)
 	if err != nil {
 		return messages, err
 	}
