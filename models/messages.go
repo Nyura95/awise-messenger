@@ -2,6 +2,7 @@ package models
 
 import (
 	"awise-messenger/helpers"
+	"log"
 	"time"
 )
 
@@ -53,9 +54,22 @@ func FindAllMessage() ([]*Message, error) {
 }
 
 // FindAllMessageByIDConversation for find all message in the database
-func FindAllMessageByIDConversation(IDConversation int, limit int) ([]*Message, error) {
+func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Message, error) {
+
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM tbl_messages WHERE id_conversation = ?", IDConversation).Scan(&count)
+
+	nbMaxPage := count / nb
+
+	if page > nbMaxPage {
+		page = nbMaxPage
+	}
+
+	log.Println(nbMaxPage)
+
 	messages := []*Message{}
-	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ?", IDConversation, limit)
+	log.Printf("%d et %d", page*nb-nb+1, page*nb-1)
+	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ?, ?", IDConversation, page*nb-nb+1, page*nb-1)
 	if err != nil {
 		return messages, err
 	}
@@ -68,6 +82,8 @@ func FindAllMessageByIDConversation(IDConversation int, limit int) ([]*Message, 
 		}
 		messages = append(messages, &message)
 	}
+	reverse(messages)
+
 	return messages, nil
 }
 
@@ -113,4 +129,11 @@ func CreateMessage(IDAccount int, IDConversation int, msg string, IDStatus int) 
 	}
 
 	return message, nil
+}
+
+func reverse(a []*Message) {
+	for i := len(a)/2 - 1; i >= 0; i-- {
+		opp := len(a) - 1 - i
+		a[i], a[opp] = a[opp], a[i]
+	}
 }

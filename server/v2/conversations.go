@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"awise-messenger/enum"
 	"awise-messenger/helpers"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
@@ -52,6 +53,10 @@ func getConversationWithATarget(payload interface{}) interface{} {
 	context := payload.(getConversationWithATargetPayload)
 
 	jobs := make(chan *models.Account, 2)
+	getAccount := func(ID int, job chan *models.Account) {
+		account, _ := models.FindAccount(ID)
+		job <- account
+	}
 	go getAccount(context.IDUser, jobs)
 	go getAccount(context.IDTarget, jobs)
 
@@ -94,45 +99,15 @@ func getConversationWithATarget(payload interface{}) interface{} {
 		return response.BasicResponse(new(interface{}), "Error when getting the room for the token", -2)
 	}
 
-	messages, err := models.FindAllMessageByIDConversation(conversation.ID, 20)
+	messages, err := models.FindAllMessageByIDConversation(conversation.ID, enum.NbMessages, 1)
 	if err != nil {
 		log.Printf("Error when getting the messages")
 		return response.BasicResponse(new(interface{}), "Error when getting the messages", -2)
 	}
-	reverse(messages)
 
 	var accounts [2]*models.Account
 	accounts[0] = account1
 	accounts[1] = account2
 
 	return response.BasicResponse(conversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1)
-}
-
-func getAccount(ID int, job chan *models.Account) {
-	account, _ := models.FindAccount(ID)
-	job <- account
-}
-
-func createNewConversation(account1 *models.Account, account2 *models.Account, create chan *models.Conversation) {
-	uniqHash := helpers.Uniqhash(account1.ID, account2.ID)
-	conversation, err := models.CreateConversation(uniqHash, "", 0, 0, 1)
-	if err != nil {
-		log.Println(err)
-		create <- conversation
-		return
-	}
-	if conversation.ID == 0 {
-		log.Println("Error create new conversation")
-		create <- conversation
-		return
-	}
-	models.CreateRoomForMultipleAccount(conversation.ID, account1.ID, account2.ID)
-	create <- conversation
-}
-
-func reverse(a []*models.Message) {
-	for i := len(a)/2 - 1; i >= 0; i-- {
-		opp := len(a) - 1 - i
-		a[i], a[opp] = a[opp], a[i]
-	}
 }

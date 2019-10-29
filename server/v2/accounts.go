@@ -23,13 +23,12 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error database", -1))
 		return
 	}
-	pool := worker.CreateWorkerPool(getAccountOnline)
+	pool := worker.CreateWorkerPool(getAccountsWorker)
 	defer pool.Close()
 	json.NewEncoder(w).Encode(response.BasicResponse(pool.Process(accounts), "ok", 1))
 }
 
-// check if the accounts passed is alive now from the socket and return a interface
-func getAccountOnline(payload interface{}) interface{} {
+func getAccountsWorker(payload interface{}) interface{} {
 	accounts := payload.([]*models.Account)
 
 	onlineAccounts := []*onlineAccount{}
