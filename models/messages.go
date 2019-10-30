@@ -54,10 +54,13 @@ func FindAllMessage() ([]*Message, error) {
 
 // FindAllMessageByIDConversation for find all message in the database
 func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Message, error) {
+	messages := []*Message{}
 
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM tbl_messages WHERE id_conversation = ?", IDConversation).Scan(&count)
-
+	if err != nil {
+		return messages, err
+	}
 	nbMaxPage := count / nb
 
 	if page == 0 {
@@ -67,7 +70,6 @@ func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Me
 		page = nbMaxPage
 	}
 
-	messages := []*Message{}
 	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ? OFFSET ?", IDConversation, nb, page*nb-nb)
 	if err != nil {
 		return messages, err
@@ -81,7 +83,6 @@ func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Me
 		}
 		messages = append(messages, &message)
 	}
-	reverse(messages)
 
 	return messages, nil
 }
@@ -94,7 +95,7 @@ func (m *Message) Update() error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(m.IDAccount, m.IDAccount, m.Message, m.IDStatus, time.UTC, m.ID)
+	_, err = stmt.Exec(m.IDAccount, m.IDAccount, m.Message, m.IDStatus, helpers.GetUtc(), m.ID)
 	if err != nil {
 		return err
 	}
@@ -130,9 +131,9 @@ func CreateMessage(IDAccount int, IDConversation int, msg string, IDStatus int) 
 	return message, nil
 }
 
-func reverse(a []*Message) {
-	for i := len(a)/2 - 1; i >= 0; i-- {
-		opp := len(a) - 1 - i
-		a[i], a[opp] = a[opp], a[i]
-	}
-}
+// func reverse(a []*Message) {
+// 	for i := len(a)/2 - 1; i >= 0; i-- {
+// 		opp := len(a) - 1 - i
+// 		a[i], a[opp] = a[opp], a[i]
+// 	}
+// }

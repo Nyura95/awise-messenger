@@ -2,5 +2,5 @@ package enum
 
 const (
 	// NbMessages for set the number of message get
-	NbMessages = 2
+	NbMessages = 20
 )

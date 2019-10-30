@@ -32,6 +32,7 @@ func Start() {
 
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}/messages/{page}", v2.GetMessages).Methods("GET")
+	r.HandleFunc("/api/v2/conversations/target/{IDTarget}/messages/{IDMessage}", v2.UpdateMessage).Methods("PUT")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")
