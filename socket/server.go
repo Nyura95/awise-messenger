@@ -77,8 +77,8 @@ func checkAuth(payload interface{}) interface{} {
 	}
 
 	if alive := Infos.alive(room.IDAccount); alive == true {
-		// middleware.msg = userAlreadyConnected
-		// return middleware
+		middleware.msg = userAlreadyConnected
+		return middleware
 	}
 
 	account, err := models.FindAccount(room.IDAccount)
