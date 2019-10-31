@@ -31,33 +31,36 @@ func UpdateMessage(payload interface{}) interface{} {
 	close(jobs)
 
 	if account1.ID == 0 || account2.ID == 0 {
-		log.Printf("User or target does not exist")
-		return response.BasicResponse(new(interface{}), "User or target does not exist", -2)
+		log.Println("User or target not find")
+		return response.BasicResponse(new(interface{}), "User or target not find", -1)
 	}
 
 	conversation, err := models.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
 	if err != nil {
-		log.Printf("Error when getting the room between the accounts")
-		return response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2)
+		log.Println("Error fetch conversation")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error fetch conversation", -2)
 	}
 
 	if conversation.ID == 0 {
-		log.Printf("Conversation does not exist")
-		return response.BasicResponse(new(interface{}), "Conversation does not exist", -2)
+		log.Println("Error create conversation (0)")
+		return response.BasicResponse(new(interface{}), "Error create conversation", -3)
 	}
 
 	message, err := models.FindMessage(context.IDMessage)
 	if err != nil {
-		log.Printf("Error when getting the message")
-		return response.BasicResponse(new(interface{}), "Error when getting the message", -2)
+		log.Println("Error find message")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error find message", -4)
 	}
 
 	message.Message = context.Message
+
 	err = message.Update()
 	if err != nil {
+		log.Printf("Error update message")
 		log.Println(err)
-		log.Printf("Error when uddate the message")
-		return response.BasicResponse(new(interface{}), "Error when uddate the message", -2)
+		return response.BasicResponse(new(interface{}), "Error update message", -5)
 	}
 
 	return message

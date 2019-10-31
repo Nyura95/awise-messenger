@@ -4,13 +4,13 @@ import "time"
 
 // AccessToken table model
 type AccessToken struct {
-	ID           int
-	IDAccount    int
-	Token        string
-	RefreshToken string
-	FlagDelete   int
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID           int       `json:"id"`
+	IDAccount    int       `json:"idAccount"`
+	Token        string    `json:"token"`
+	RefreshToken string    `json:"refreshToken"`
+	FlagDelete   int       `json:"flagDelete"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // FindAccessToken for find one access_token by id

@@ -31,25 +31,27 @@ func GetMessages(payload interface{}) interface{} {
 	close(jobs)
 
 	if account1.ID == 0 || account2.ID == 0 {
-		log.Printf("User or target does not exist")
-		return response.BasicResponse(new(interface{}), "User or target does not exist", -2)
+		log.Println("User or target not find")
+		return response.BasicResponse(new(interface{}), "User or target not find", -1)
 	}
 
 	conversation, err := models.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
 	if err != nil {
-		log.Printf("Error when getting the room between the accounts")
-		return response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2)
+		log.Println("Error fetch conversation")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error fetch conversation", -2)
 	}
 
 	if conversation.ID == 0 {
-		log.Printf("Conversation does not exist")
-		return response.BasicResponse(new(interface{}), "Conversation does not exist", -2)
+		log.Println("Error create conversation (0)")
+		return response.BasicResponse(new(interface{}), "Error create conversation", -3)
 	}
 
 	messages, err := models.FindAllMessageByIDConversation(conversation.ID, enum.NbMessages, context.Page)
 	if err != nil {
-		log.Printf("Error when getting the messages")
-		return response.BasicResponse(new(interface{}), "Error when getting the messages", -2)
+		log.Println("Error find messages conversation")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error find messages conversation", -4)
 	}
 
 	return response.BasicResponse(messages, "ok", 1)

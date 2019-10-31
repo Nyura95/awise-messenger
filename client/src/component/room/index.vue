@@ -22,17 +22,17 @@
     <div class="col-12 mt-4">
       <div class="scroll" v-chat-scroll="{always: false, smooth: true}">
         <div class="row mt-2 mb-2 container_message" v-for="(message, key) in messages" :key="key">
-          <div class="col-12" v-if="message.IDAccount === id">
+          <div class="col-12" v-if="message.idAccount === id">
             <div class="row">
               <div class="col-auto message">
-                <span>{{message.Message}}</span>
+                <span>{{message.message}}</span>
               </div>
             </div>
           </div>
-          <div class="col-12" v-if="message.IDAccount !== id">
+          <div class="col-12" v-if="message.idAccount !== id">
             <div class="row">
               <div class="col-auto left message target">
-                <span>{{message.Message}}</span>
+                <span>{{message.message}}</span>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@
 </template>
 
 <script>
-// accounts[message.IDAccount]
+// accounts[message.idAccount]
 import { fetch } from "../../plugings/request";
 import AwiseSocket from "../../plugings/socket/index";
 export default {
@@ -112,10 +112,10 @@ export default {
           Authorization: this.tokenApi
         }
       ).then(result => {
-        this.messages = result.Data.Messages;
-        for (let i = 0; i < result.Data.Accounts.length; i++) {
-          this.accounts[result.Data.Accounts[i].ID] =
-            result.Data.Accounts[i].Firstname;
+        this.messages = result.data.messages;
+        for (let i = 0; i < result.data.accounts.length; i++) {
+          this.accounts[result.data.accounts[i].id] =
+            result.data.accounts[i].firstname;
         }
         console.log(result);
       });

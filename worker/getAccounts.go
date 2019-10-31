@@ -11,8 +11,8 @@ import (
 func GetAccounts(payload interface{}) interface{} {
 	accounts, err := models.FindAllAccount()
 	if err != nil {
-		log.Printf("Error get accounts")
-		return response.BasicResponse(new(interface{}), "Error get accounts", -2)
+		log.Println("Error fetch accounts")
+		return response.BasicResponse(new(interface{}), "Error fetch accounts", -1)
 	}
 	accountInfos := []*models.AccountInfos{}
 	for _, account := range accounts {

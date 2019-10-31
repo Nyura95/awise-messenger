@@ -9,12 +9,12 @@ import (
 
 // Room table model
 type Room struct {
-	ID             int
-	IDConversation int
-	IDAccount      int
-	Token          string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID             int       `json:"id"`
+	IDConversation int       `json:"idConversation"`
+	IDAccount      int       `json:"idAccount"`
+	Token          string    `json:"token"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"cupdatedAt"`
 }
 
 // FindRoom for find one room by id

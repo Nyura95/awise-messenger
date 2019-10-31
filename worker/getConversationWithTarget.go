@@ -31,44 +31,49 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 	close(jobs)
 
 	if account1.ID == 0 || account2.ID == 0 {
-		log.Printf("User or target does not exist")
-		return response.BasicResponse(new(interface{}), "User or target does not exist", -2)
+		log.Println("User or target not find")
+		return response.BasicResponse(new(interface{}), "User or target not find", -1)
 	}
 
 	conversation, err := models.FindConversationBetweenTwoAccount(account1.ID, account2.ID)
 	if err != nil {
-		log.Printf("Error when getting the room between the accounts")
-		return response.BasicResponse(new(interface{}), "Error when getting the room between the accounts", -2)
+		log.Println("Error fetch conversation")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error fetch conversation", -2)
 	}
 
 	if conversation.ID == 0 {
 		conversation, err := models.CreateConversation(helpers.Uniqhash(account1.ID, account2.ID), "", 0, 0, 1)
-		if err != nil || conversation.ID == 0 {
+		if err != nil {
+			log.Println("Error create conversation")
 			log.Println(err)
-			return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
+			return response.BasicResponse(new(interface{}), "Error create conversation", -3)
 		}
+		if conversation.ID == 0 {
+			log.Println("Error create conversation (0)")
+			return response.BasicResponse(new(interface{}), "Error create conversation", -3)
+		}
+
 		err = models.CreateRoomForMultipleAccount(conversation.ID, account1.ID, account2.ID)
 		if err != nil {
+			log.Println("Error create rooms")
 			log.Println(err)
-			return response.BasicResponse(new(interface{}), "Error when creating the rooms into the datatable", -2)
+			return response.BasicResponse(new(interface{}), "Error create rooms", -4)
 		}
-	}
-
-	if conversation.ID == 0 {
-		log.Printf("Error when creating the conversation into the datatable")
-		return response.BasicResponse(new(interface{}), "Error when creating the conversation into the datatable", -2)
 	}
 
 	room, err := models.FindRoomByIDConversationAndIDAccount(conversation.ID, context.IDUser)
 	if err != nil {
-		log.Printf("Error when getting the room for the token")
-		return response.BasicResponse(new(interface{}), "Error when getting the room for the token", -2)
+		log.Println("Error find rooms")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error find rooms", -5)
 	}
 
 	messages, err := models.FindAllMessageByIDConversation(conversation.ID, enum.NbMessages, 1)
 	if err != nil {
-		log.Printf("Error when getting the messages")
-		return response.BasicResponse(new(interface{}), "Error when getting the messages", -2)
+		log.Println("Error find messages conversation")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error find messages conversation", -6)
 	}
 
 	var accounts [2]*models.Account
