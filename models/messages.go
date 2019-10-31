@@ -95,7 +95,7 @@ func (m *Message) Update() error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(m.IDAccount, m.IDAccount, m.Message, m.IDStatus, helpers.GetUtc(), m.ID)
+	_, err = stmt.Exec(m.IDAccount, m.IDConversation, m.Message, m.IDStatus, helpers.GetUtc(), m.ID)
 	if err != nil {
 		return err
 	}
