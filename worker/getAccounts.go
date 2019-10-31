@@ -7,12 +7,6 @@ import (
 	"log"
 )
 
-// GetAccountsWithInfo is a struct for the front
-type GetAccountsWithInfo struct {
-	models.Account
-	Online bool
-}
-
 // GetAccounts for transform accouts in
 func GetAccounts(payload interface{}) interface{} {
 	accounts, err := models.FindAllAccount()
@@ -20,7 +14,7 @@ func GetAccounts(payload interface{}) interface{} {
 		log.Printf("Error get accounts")
 		return response.BasicResponse(new(interface{}), "Error get accounts", -2)
 	}
-	accountsWithInfos := []*GetAccountsWithInfo{}
+	accountInfos := []*models.AccountInfos{}
 	for _, account := range accounts {
 		online := false
 		for _, id := range socket.Infos.List {
@@ -28,8 +22,8 @@ func GetAccounts(payload interface{}) interface{} {
 				online = true
 			}
 		}
-		accountsWithInfos = append(accountsWithInfos, &GetAccountsWithInfo{Account: *account, Online: online})
+		accountInfos = append(accountInfos, &models.AccountInfos{Account: account, Online: online})
 	}
 
-	return response.BasicResponse(accountsWithInfos, "ok", 1)
+	return response.BasicResponse(accountInfos, "ok", 1)
 }

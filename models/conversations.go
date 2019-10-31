@@ -7,14 +7,22 @@ import (
 
 // Conversation table model
 type Conversation struct {
-	ID             int
-	UniqHash       string
-	Title          string
-	IDLastMessage  int
-	IDFirstMessage int
-	IDStatus       int
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID             int       `json:"id"`
+	UniqHash       string    `json:"uniqHash"`
+	Title          string    `json:"title"`
+	IDLastMessage  int       `json:"idLastMessage"`
+	IDFirstMessage int       `json:"idFirstMessage"`
+	IDStatus       int       `json:"idStatus"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+}
+
+// ConversationWithToken it's the conversation with all infos
+type ConversationWithToken struct {
+	*Conversation
+	Token    string      `json:"token"`
+	Messages []*Message  `json:"messages"`
+	Accounts [2]*Account `json:"accounts"`
 }
 
 // FindConversation for find one conversation by id

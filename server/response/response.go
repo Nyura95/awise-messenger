@@ -2,11 +2,11 @@ package response
 
 // Response generic
 type Response struct {
-	StatusCode int
-	Reason     int
-	Comment    string
-	Success    bool
-	Data       interface{}
+	StatusCode int         `json:"statusCode"`
+	Reason     int         `json:"reason"`
+	Comment    string      `json:"comment"`
+	Success    bool        `json:"success"`
+	Data       interface{} `json:"data"`
 }
 
 // BasicResponse from API

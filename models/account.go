@@ -8,15 +8,21 @@ import (
 
 // Account table models
 type Account struct {
-	ID        int
-	Avatars   string
-	Firstname string
-	Lastname  string
-	Username  string
+	ID        int    `json:"id"`
+	Avatars   string `json:"avatars"`
+	Firstname string `json:"firstName"`
+	Lastname  string `json:"lastName"`
+	Username  string `json:"username"`
 	password  string
-	IDScope   int
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	IDScope   int       `json:"idScope"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// AccountInfos it's the account with info for the front
+type AccountInfos struct {
+	*Account
+	Online bool `json:"online"`
 }
 
 // FindAccount for find one account by id

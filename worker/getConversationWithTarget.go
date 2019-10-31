@@ -14,14 +14,6 @@ type GetConversationWithATargetPayload struct {
 	IDTarget int
 }
 
-// ConversationWithToken it's the interface return of GetConversationWithATarget
-type ConversationWithToken struct {
-	*models.Conversation
-	Token    string
-	Messages []*models.Message
-	Accounts [2]*models.Account
-}
-
 // GetConversationWithATarget return a basic response
 func GetConversationWithATarget(payload interface{}) interface{} {
 	context := payload.(GetConversationWithATargetPayload)
@@ -83,5 +75,5 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 	accounts[0] = account1
 	accounts[1] = account2
 
-	return response.BasicResponse(ConversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1)
+	return response.BasicResponse(models.ConversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1)
 }

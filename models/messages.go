@@ -7,13 +7,13 @@ import (
 
 // Message table model
 type Message struct {
-	ID             int
-	IDAccount      int
-	IDConversation int
-	Message        string
-	IDStatus       int
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID             int       `json:"id"`
+	IDAccount      int       `json:"idAccount"`
+	IDConversation int       `json:"idConversation"`
+	Message        string    `json:"message"`
+	IDStatus       int       `json:"idStatus"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 // FindMessage for find one access_token by id
