@@ -1,4 +1,4 @@
-package socket
+package info
 
 type info struct {
 	List []int
@@ -7,11 +7,11 @@ type info struct {
 // Infos public
 var Infos = info{}
 
-func (i *info) add(id int) {
+func (i *info) Add(id int) {
 	i.List = append(i.List, id)
 }
 
-func (i *info) del(id int) {
+func (i *info) Del(id int) {
 	for index, idAccount := range i.List {
 		if idAccount == id {
 			i.List = append(i.List[:index], i.List[index+1:]...)
@@ -20,7 +20,7 @@ func (i *info) del(id int) {
 	}
 }
 
-func (i *info) alive(id int) bool {
+func (i *info) Alive(id int) bool {
 	for _, idAccount := range i.List {
 		if idAccount == id {
 			return true
@@ -29,6 +29,6 @@ func (i *info) alive(id int) bool {
 	return false
 }
 
-func (i *info) nbAlive() int {
+func (i *info) NbAlive() int {
 	return len(i.List)
 }

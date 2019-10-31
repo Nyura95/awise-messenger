@@ -3,7 +3,7 @@ package worker
 import (
 	"awise-messenger/models"
 	"awise-messenger/server/response"
-	"awise-messenger/socket"
+	"awise-messenger/socket/info"
 	"log"
 )
 
@@ -17,7 +17,7 @@ func GetAccounts(payload interface{}) interface{} {
 	accountInfos := []*models.AccountInfos{}
 	for _, account := range accounts {
 		online := false
-		for _, id := range socket.Infos.List {
+		for _, id := range info.Infos.List {
 			if account.ID == id {
 				online = true
 			}

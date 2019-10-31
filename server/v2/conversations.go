@@ -3,7 +3,8 @@ package v2
 import (
 	"awise-messenger/helpers"
 	"awise-messenger/server/response"
-	"awise-messenger/worker"
+	"awise-messenger/server/worker"
+
 	"encoding/json"
 	"log"
 	"net/http"

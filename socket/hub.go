@@ -2,6 +2,7 @@ package socket
 
 import (
 	"awise-messenger/socket/action"
+	"awise-messenger/socket/info"
 	"log"
 )
 
@@ -48,19 +49,19 @@ func (h *Hub) run() {
 				other.send <- action.NewConnection(client.account.ID).Send()
 			}
 			h.clients[client] = true
-			Infos.add(client.account.ID)
-			log.Printf("New client register %s (%d) alive now : %d", client.account.Firstname, client.account.ID, Infos.nbAlive())
+			info.Infos.Add(client.account.ID)
+			log.Printf("New client register %s (%d) alive now : %d", client.account.Firstname, client.account.ID, info.Infos.NbAlive())
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 
 				delete(h.clients, client)
 				close(client.send)
 
-				Infos.del(client.account.ID)
+				info.Infos.Del(client.account.ID)
 				for other := range h.clients {
 					other.send <- action.NewDisconnection(client.account.ID).Send()
 				}
-				log.Printf("Client unregister %s (%d) alive now : %d", client.account.Firstname, client.account.ID, Infos.nbAlive())
+				log.Printf("Client unregister %s (%d) alive now : %d", client.account.Firstname, client.account.ID, info.Infos.NbAlive())
 			}
 		case disseminateToTheOthers := <-h.disseminateToTheOthers:
 			for client := range h.clients {

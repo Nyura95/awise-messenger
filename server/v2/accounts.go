@@ -2,7 +2,7 @@ package v2
 
 import (
 	"awise-messenger/helpers"
-	"awise-messenger/worker"
+	"awise-messenger/server/worker"
 	"encoding/json"
 	"net/http"
 )

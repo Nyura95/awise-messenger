@@ -42,6 +42,9 @@ export default {
       default: 100
     }
   },
+  destroyed: function() {
+    this.close();
+  },
   mounted: function() {
     if ("Notification" in window) {
       Notification.requestPermission(() => {
