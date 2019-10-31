@@ -5,19 +5,6 @@ import (
 	"awise-messenger/socket/info"
 )
 
-const (
-	queryEmpty           = "query is empty"
-	tokenDelete          = "this token is delete"
-	authNotFound         = "auth does not found"
-	userAlreadyConnected = "user already connected"
-	userNotFound         = "user not found"
-	targetNotFound       = "target not found"
-	targetIsNotANumber   = "target is not a number"
-	tagetIsUser          = "target is the user"
-	conversationNotFound = "Conversation not found"
-	roundNotFound        = "Round not found"
-)
-
 // CreateClientReturn return CreateClientReturn
 type CreateClientReturn struct {
 	Account      *models.Account
@@ -33,7 +20,7 @@ func CreateClient(payload interface{}) interface{} {
 	middleware := &CreateClientReturn{Auth: false}
 
 	if token == "" {
-		middleware.Msg = queryEmpty
+		middleware.Msg = "query is empty"
 		return middleware
 	}
 
@@ -44,20 +31,20 @@ func CreateClient(payload interface{}) interface{} {
 	}
 
 	if alive := info.Infos.Alive(room.IDAccount); alive == true {
-		middleware.Msg = userAlreadyConnected
-		return middleware
+		// middleware.Msg = "user already connected"
+		// return middleware
 	}
 
 	account, err := models.FindAccount(room.IDAccount)
 	if account.ID == 0 || err != nil {
-		middleware.Msg = userNotFound
+		middleware.Msg = "user not found"
 		return middleware
 	}
 	middleware.Account = account
 
 	conversation, err := models.FindConversation(room.IDConversation)
 	if err != nil {
-		middleware.Msg = conversationNotFound
+		middleware.Msg = "Conversation not find"
 		return middleware
 	}
 
@@ -65,7 +52,7 @@ func CreateClient(payload interface{}) interface{} {
 
 	rooms, err := models.FindAllRoomsByIDConversation(conversation.ID)
 	if err != nil {
-		middleware.Msg = conversationNotFound // TPM
+		middleware.Msg = "Rooms not find"
 		return middleware
 	}
 

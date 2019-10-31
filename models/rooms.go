@@ -20,7 +20,7 @@ type Room struct {
 // FindRoom for find one room by id
 func FindRoom(id int) (*Room, error) {
 	room := Room{}
-	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms essages WHERE id = ? LIMIT 1", id)
+	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms WHERE id = ? LIMIT 1", id)
 	if err != nil {
 		return &room, err
 	}
@@ -37,7 +37,7 @@ func FindRoom(id int) (*Room, error) {
 // FindRoomByToken for find one room by token
 func FindRoomByToken(token string) (*Room, error) {
 	room := Room{}
-	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms essages WHERE token = ? LIMIT 1", token)
+	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms WHERE token = ? LIMIT 1", token)
 	if err != nil {
 		return &room, err
 	}
@@ -73,7 +73,7 @@ func FindAllRooms() ([]*Room, error) {
 // FindRoomByIDConversationAndIDAccount for find all rooms by id_conversation in the database
 func FindRoomByIDConversationAndIDAccount(IDConversation int, IDAccount int) (*Room, error) {
 	room := Room{}
-	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms essages WHERE id_conversation = ? AND id_account = ? LIMIT 1", IDConversation, IDAccount)
+	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms WHERE id_conversation = ? AND id_account = ? LIMIT 1", IDConversation, IDAccount)
 	if err != nil {
 		return &room, err
 	}
