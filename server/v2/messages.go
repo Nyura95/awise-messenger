@@ -1,6 +1,7 @@
 package v2
 
 import (
+	"awise-messenger/helpers"
 	"awise-messenger/server/response"
 	"awise-messenger/worker"
 	"encoding/json"
@@ -34,7 +35,7 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pool := worker.CreateWorkerPool(worker.GetMessages)
+	pool := helpers.CreateWorkerPool(worker.GetMessages)
 	defer pool.Close()
 	json.NewEncoder(w).Encode(pool.Process(worker.GetMessagesPayload{IDTarget: IDTarget, IDUser: IDUser, Page: page}))
 }
@@ -65,7 +66,7 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pool := worker.CreateWorkerPool(worker.UpdateMessage)
+	pool := helpers.CreateWorkerPool(worker.UpdateMessage)
 	defer pool.Close()
 	json.NewEncoder(w).Encode(pool.Process(worker.UpdateMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
 }

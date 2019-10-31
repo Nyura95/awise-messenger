@@ -2,8 +2,8 @@ package socket
 
 import (
 	"awise-messenger/config"
+	"awise-messenger/helpers"
 	"awise-messenger/models"
-	"awise-messenger/worker"
 	"log"
 	"net/http"
 	"strconv"
@@ -43,7 +43,7 @@ func Start() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/{token}", func(w http.ResponseWriter, r *http.Request) {
-		pool := worker.CreateWorkerPool(checkAuth)
+		pool := helpers.CreateWorkerPool(checkAuth)
 		defer pool.Close()
 		middleware := pool.Process(r).(*middleware)
 		if middleware.auth == false {

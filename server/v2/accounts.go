@@ -1,10 +1,10 @@
 package v2
 
 import (
+	"awise-messenger/helpers"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
 	"awise-messenger/socket"
-	"awise-messenger/worker"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -23,7 +23,7 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "Error database", -1))
 		return
 	}
-	pool := worker.CreateWorkerPool(getAccountsWorker)
+	pool := helpers.CreateWorkerPool(getAccountsWorker)
 	defer pool.Close()
 	json.NewEncoder(w).Encode(response.BasicResponse(pool.Process(accounts), "ok", 1))
 }
