@@ -7,14 +7,14 @@ import (
 
 // Error action front
 type Error struct {
-	Action  string
-	LocKey  string
-	Message string
+	Action  string `json:"action"`
+	LocKey  string `json:"lockey"`
+	Message string `json:"message"`
 }
 
 // NewError create a new instance of new error
 func NewError(message string) *Error {
-	return &Error{Action: "Error", LocKey: strings.ReplaceAll(message, " ", "_"), Message: message}
+	return &Error{Action: "error", LocKey: strings.ReplaceAll(message, " ", "_"), Message: message}
 }
 
 // Send to the front

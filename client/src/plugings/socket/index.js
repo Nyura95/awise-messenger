@@ -55,18 +55,18 @@ AwiseSocket.prototype.initConversation = function(token, callback) {
     var messages = event.data.split('\n');
     for (let i = 0; i < messages.length; i++) {
       var message = JSON.parse(messages[i]);
-      this._log('new message receive (' + message.Action + ')');
-      if (message.Action === 'Message') {
-        this.message ? this.message(message.Message) : null;
+      this._log('new message receive (' + message.action + ')');
+      if (message.action === 'message') {
+        this.message ? this.message(message.message) : null;
       }
-      if (message.Action === 'Connection') {
-        this.connection ? this.connection(message.User) : null;
+      if (message.action === 'connection') {
+        this.connection ? this.connection(message.user) : null;
       }
-      if (message.Action === 'Disconnection') {
-        this.disconnection ? this.disconnection(message.User) : null;
+      if (message.action === 'disconnection') {
+        this.disconnection ? this.disconnection(message.user) : null;
       }
-      if (message.Action === 'Error') {
-        this.error ? this.error(message.LocKey, message.Message) : null;
+      if (message.action === 'error') {
+        this.error ? this.error(message.locKey, message.message) : null;
       }
     }
   }.bind(this);

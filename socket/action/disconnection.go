@@ -4,13 +4,13 @@ import "encoding/json"
 
 // Disconnection action front
 type Disconnection struct {
-	Action string
-	User   int
+	Action string `json:"action"`
+	User   int    `json:"user"`
 }
 
 // NewDisconnection create a new instance of new connection
 func NewDisconnection(user int) *Disconnection {
-	return &Disconnection{Action: "Disconnection", User: user}
+	return &Disconnection{Action: "disconnection", User: user}
 }
 
 // Send to the front

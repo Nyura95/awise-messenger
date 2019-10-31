@@ -7,9 +7,9 @@ import (
 
 // Message action front
 type Message struct {
-	Action  string
-	IDUser  int
-	Message *models.Message
+	Action  string          `json:"action"`
+	IDUser  int             `json:"idUser"`
+	Message *models.Message `json:"message"`
 }
 
 // NewMessage create a new instance of message
@@ -18,7 +18,7 @@ func NewMessage(IDUser int, IDConversation int, msg string) *Message {
 	if err != nil {
 		return &Message{}
 	}
-	return &Message{Action: "Message", IDUser: IDUser, Message: message}
+	return &Message{Action: "message", IDUser: IDUser, Message: message}
 }
 
 // Send to the front

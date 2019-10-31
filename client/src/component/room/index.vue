@@ -112,7 +112,7 @@ export default {
           Authorization: this.tokenApi
         }
       ).then(result => {
-        this.messages = result.data.messages;
+        this.messages = result.data.messages.reverse();
         for (let i = 0; i < result.data.accounts.length; i++) {
           this.accounts[result.data.accounts[i].id] =
             result.data.accounts[i].firstname;

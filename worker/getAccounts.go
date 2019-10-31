@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-// GetAccounts for transform accouts in
+// GetAccounts return a basic response
 func GetAccounts(payload interface{}) interface{} {
 	accounts, err := models.FindAllAccount()
 	if err != nil {

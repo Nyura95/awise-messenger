@@ -4,13 +4,13 @@ import "encoding/json"
 
 // Connection action front
 type Connection struct {
-	Action string
-	User   int
+	Action string `json:"action"`
+	User   int    `json:"user"`
 }
 
 // NewConnection create a new instance of new connection
 func NewConnection(user int) *Connection {
-	return &Connection{Action: "Connection", User: user}
+	return &Connection{Action: "connection", User: user}
 }
 
 // Send to the front
