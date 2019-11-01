@@ -26,7 +26,7 @@ func CreateClient(payload interface{}) interface{} {
 
 	room, err := models.FindRoomByToken(token)
 	if err != nil {
-		middleware.Msg = roundNotFound
+		middleware.Msg = "Token not find"
 		return middleware
 	}
 

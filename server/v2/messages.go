@@ -59,8 +59,6 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&body)
 
-	log.Println(body)
-
 	if IDUser == IDTarget {
 		log.Printf("The id's are similar !")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
