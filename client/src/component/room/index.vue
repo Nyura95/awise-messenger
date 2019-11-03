@@ -31,7 +31,7 @@
           </div>
           <div class="col-12" v-if="message.idAccount !== id">
             <div class="row">
-              <div class="col-auto left message target">
+              <div class="col-auto left message target" :click="update(message.idAccount, 'test')">
                 <span>{{message.message}}</span>
               </div>
             </div>
@@ -97,6 +97,9 @@ export default {
     };
   },
   methods: {
+    update(id, message) {
+      // this.socket.sendAction("update", { id, message });
+    },
     sendMessage() {
       this.socket.send(this.message);
     },

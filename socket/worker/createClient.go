@@ -31,8 +31,8 @@ func CreateClient(payload interface{}) interface{} {
 	}
 
 	if alive := info.Infos.Alive(room.IDAccount); alive == true {
-		// middleware.Msg = "user already connected"
-		// return middleware
+		middleware.Msg = "user already connected"
+		return middleware
 	}
 
 	account, err := models.FindAccount(room.IDAccount)
