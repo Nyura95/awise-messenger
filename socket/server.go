@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Shadowlands is a socket hub
+// ShadowLands is a socket hub
 var ShadowLands = newHub()
 
 // Start the socket server

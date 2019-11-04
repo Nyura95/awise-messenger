@@ -66,5 +66,6 @@ func UpdateMessage(payload interface{}) interface{} {
 	}
 
 	socket.ShadowLands.DisseminateToTheTargets <- &socket.DisseminateToTheTargets{Message: action.NewUpdate(message).Send(), Targets: []int{account2.ID, account1.ID}}
-	return message
+
+	return response.BasicResponse(message, "ok", 1)
 }
