@@ -2,16 +2,18 @@ package models
 
 import (
 	"awise-messenger/helpers"
+	"log"
 	"time"
 )
 
 // Message table model
 type Message struct {
-	ID             int       `json:"id"`
-	IDAccount      int       `json:"idAccount"`
-	IDConversation int       `json:"idConversation"`
-	Message        string    `json:"message"`
-	IDStatus       int       `json:"idStatus"`
+	ID             int    `json:"id"`
+	IDAccount      int    `json:"idAccount"`
+	IDConversation int    `json:"idConversation"`
+	Message        string `json:"message"`
+	IDStatus       int    `json:"idStatus"`
+	delete         int
 	CreatedAt      time.Time `json:"createdAt"`
 	UpdatedAt      time.Time `json:"updatedAt"`
 }
@@ -69,8 +71,13 @@ func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Me
 	if page > nbMaxPage {
 		page = nbMaxPage
 	}
+	offset := page*nb - nb
+	if offset < 0 {
+		offset = 0
+	}
 
-	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? ORDER BY id DESC LIMIT ? OFFSET ?", IDConversation, nb, page*nb-nb)
+	log.Printf("%d, %d", nb, page*nb-nb)
+	result, err := db.Query("SELECT id, id_account, id_conversation, message, id_status, created_at, updated_at FROM tbl_messages WHERE id_conversation = ? AND `delete` = 0 ORDER BY id DESC LIMIT ? OFFSET ?", IDConversation, nb, offset)
 	if err != nil {
 		return messages, err
 	}
@@ -87,7 +94,7 @@ func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Me
 	return messages, nil
 }
 
-// Update a message
+// Update this message
 func (m *Message) Update() error {
 	stmt, err := db.Prepare("UPDATE tbl_messages SET id_account = ?, id_conversation = ?, message = ?, id_status = ?, updated_at = ? WHERE id = ?")
 	if err != nil {
@@ -103,17 +110,33 @@ func (m *Message) Update() error {
 	return nil
 }
 
+// Delete this message
+func (m *Message) Delete() error {
+	stmt, err := db.Prepare("UPDATE tbl_messages SET `delete` = ?,  updated_at = ? WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(1, helpers.GetUtc(), m.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateMessage for insert a new message into the database
 func CreateMessage(IDAccount int, IDConversation int, msg string, IDStatus int) (*Message, error) {
 	message := &Message{}
-	stmt, err := db.Prepare("INSERT INTO tbl_messages(id_account, id_conversation, message, id_status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO tbl_messages(id_account, id_conversation, message, id_status, `delete`, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return message, err
 	}
 	defer stmt.Close()
 
 	utc := helpers.GetUtc()
-	result, err := stmt.Exec(IDAccount, IDConversation, msg, IDStatus, utc, utc)
+	result, err := stmt.Exec(IDAccount, IDConversation, msg, IDStatus, 0, utc, utc)
 	if err != nil {
 		return message, err
 	}

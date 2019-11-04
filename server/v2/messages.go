@@ -69,3 +69,32 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 	defer pool.Close()
 	json.NewEncoder(w).Encode(pool.Process(worker.UpdateMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
 }
+
+// DeleteMessage for update a message
+func DeleteMessage(w http.ResponseWriter, r *http.Request) {
+	IDUser := context.Get(r, "IDUser").(int)
+	IDTarget, err := strconv.Atoi(mux.Vars(r)["IDTarget"])
+	IDMessage, err2 := strconv.Atoi(mux.Vars(r)["IDMessage"])
+
+	if err != nil || err2 != nil {
+		log.Println("The IDTarget is not valid")
+		log.Println(err)
+		log.Println(err2)
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The IDTarget is not valid", -1))
+		return
+	}
+
+	var body updateMessagePost
+	decoder := json.NewDecoder(r.Body)
+	_ = decoder.Decode(&body)
+
+	if IDUser == IDTarget {
+		log.Printf("The id's are similar !")
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
+		return
+	}
+
+	pool := helpers.CreateWorkerPool(worker.DeleteMessage)
+	defer pool.Close()
+	json.NewEncoder(w).Encode(pool.Process(worker.DeleteMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
+}

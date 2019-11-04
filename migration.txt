@@ -26,6 +26,7 @@ CREATE TABLE tbl_messages (
 	id_conversation int(11) NOT NULL,
 	message varchar(255),
 	id_status int(11) NOT NULL,
+	`delete` int(1) NOT NULL,
 	created_at DATETIME,
 	updated_at DATETIME,
 	PRIMARY key(id)

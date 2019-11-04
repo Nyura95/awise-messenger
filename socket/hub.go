@@ -33,11 +33,13 @@ type Hub struct {
 func newHub() *Hub {
 	return &Hub{
 		Broadcast:               make(chan []byte),
-		disseminateToTheOthers:  make(chan *DisseminateToTheOthers),
 		DisseminateToTheTargets: make(chan *DisseminateToTheTargets),
-		register:                make(chan *Client),
-		unregister:              make(chan *Client),
-		clients:                 make(map[*Client]bool),
+
+		disseminateToTheOthers: make(chan *DisseminateToTheOthers),
+
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+		clients:    make(map[*Client]bool),
 	}
 }
 

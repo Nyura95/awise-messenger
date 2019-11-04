@@ -8,17 +8,17 @@ import (
 	"log"
 )
 
-// UpdateMessagePayload for call UpdateMessage
-type UpdateMessagePayload struct {
+// DeleteMessagePayload for call UpdateMessage
+type DeleteMessagePayload struct {
 	IDUser    int
 	IDTarget  int
 	IDMessage int
 	Message   string
 }
 
-// UpdateMessage return a basic response
-func UpdateMessage(payload interface{}) interface{} {
-	context := payload.(UpdateMessagePayload)
+// DeleteMessage return a basic response
+func DeleteMessage(payload interface{}) interface{} {
+	context := payload.(DeleteMessagePayload)
 
 	jobs := make(chan *models.Account, 2)
 	getAccount := func(ID int, job chan *models.Account) {
@@ -57,20 +57,18 @@ func UpdateMessage(payload interface{}) interface{} {
 	}
 
 	if message.IDAccount != context.IDUser {
-		log.Println("Error update message because the user is not the creator")
+		log.Println("Error delete message because the user is not the creator")
 		return response.BasicResponse(new(interface{}), "Error creator", -5)
 	}
 
-	message.Message = context.Message
-
-	err = message.Update()
+	err = message.Delete()
 	if err != nil {
 		log.Printf("Error update message")
 		log.Println(err)
 		return response.BasicResponse(new(interface{}), "Error update message", -5)
 	}
 
-	socket.ShadowLands.DisseminateToTheTargets <- &socket.DisseminateToTheTargets{Message: action.NewUpdate(message).Send(), Targets: []int{account2.ID, account1.ID}}
+	socket.ShadowLands.DisseminateToTheTargets <- &socket.DisseminateToTheTargets{Message: action.NewDelete(message).Send(), Targets: []int{account2.ID, account1.ID}}
 
 	return response.BasicResponse(message, "ok", 1)
 }

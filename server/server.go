@@ -20,7 +20,7 @@ func Start() {
 
 	// Cors auth
 	originsOk := handlers.AllowedOrigins([]string{"*"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"})
 	headersOk := handlers.AllowedHeaders([]string{"authorization", "content-type"})
 
 	// middleware
@@ -33,6 +33,7 @@ func Start() {
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}/messages/{page}", v2.GetMessages).Methods("GET")
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}/messages/{IDMessage}", v2.UpdateMessage).Methods("PUT")
+	r.HandleFunc("/api/v2/conversations/target/{IDTarget}/messages/{IDMessage}", v2.DeleteMessage).Methods("DELETE")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")
