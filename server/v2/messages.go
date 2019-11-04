@@ -84,10 +84,6 @@ func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var body updateMessagePost
-	decoder := json.NewDecoder(r.Body)
-	_ = decoder.Decode(&body)
-
 	if IDUser == IDTarget {
 		log.Printf("The id's are similar !")
 		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
@@ -96,5 +92,5 @@ func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 
 	pool := helpers.CreateWorkerPool(worker.DeleteMessage)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.DeleteMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
+	json.NewEncoder(w).Encode(pool.Process(worker.DeleteMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage}))
 }

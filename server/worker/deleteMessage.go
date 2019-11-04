@@ -13,7 +13,6 @@ type DeleteMessagePayload struct {
 	IDUser    int
 	IDTarget  int
 	IDMessage int
-	Message   string
 }
 
 // DeleteMessage return a basic response
