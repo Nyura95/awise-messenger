@@ -21,7 +21,7 @@ type updateMessagePost struct {
 // GetMessages with the status of the connection socket
 func GetMessages(w http.ResponseWriter, r *http.Request) {
 	IDUser := context.Get(r, "IDUser").(int)
-	IDTarget, err := strconv.Atoi(mux.Vars(r)["IDTarget"])
+	IDConversation, err := strconv.Atoi(mux.Vars(r)["IDConversation"])
 	page, err2 := strconv.Atoi(mux.Vars(r)["page"])
 
 	if err != nil || err2 != nil {
@@ -30,28 +30,20 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if IDUser == IDTarget {
-		log.Printf("The id's are similar !")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
-		return
-	}
-
 	pool := helpers.CreateWorkerPool(worker.GetMessages)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.GetMessagesPayload{IDTarget: IDTarget, IDUser: IDUser, Page: page}))
+	json.NewEncoder(w).Encode(pool.Process(worker.GetMessagesPayload{IDUser: IDUser, IDConversation: IDConversation, Page: page}))
 }
 
 // UpdateMessage for update a message
 func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 	IDUser := context.Get(r, "IDUser").(int)
-	IDTarget, err := strconv.Atoi(mux.Vars(r)["IDTarget"])
+	IDConversation, err := strconv.Atoi(mux.Vars(r)["IDConversation"])
 	IDMessage, err2 := strconv.Atoi(mux.Vars(r)["IDMessage"])
 
 	if err != nil || err2 != nil {
-		log.Println("The IDTarget is not valid")
-		log.Println(err)
-		log.Println(err2)
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The IDTarget is not valid", -1))
+		log.Println("The query is not valid")
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The query is not valid", -1))
 		return
 	}
 
@@ -59,21 +51,15 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	_ = decoder.Decode(&body)
 
-	if IDUser == IDTarget {
-		log.Printf("The id's are similar !")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
-		return
-	}
-
 	pool := helpers.CreateWorkerPool(worker.UpdateMessage)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.UpdateMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
+	json.NewEncoder(w).Encode(pool.Process(worker.UpdateMessagePayload{IDConversation: IDConversation, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
 }
 
 // DeleteMessage for update a message
 func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 	IDUser := context.Get(r, "IDUser").(int)
-	IDTarget, err := strconv.Atoi(mux.Vars(r)["IDTarget"])
+	IDConversation, err := strconv.Atoi(mux.Vars(r)["IDConversation"])
 	IDMessage, err2 := strconv.Atoi(mux.Vars(r)["IDMessage"])
 
 	if err != nil || err2 != nil {
@@ -84,13 +70,7 @@ func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if IDUser == IDTarget {
-		log.Printf("The id's are similar !")
-		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The id's are similar !", -2))
-		return
-	}
-
 	pool := helpers.CreateWorkerPool(worker.DeleteMessage)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.DeleteMessagePayload{IDTarget: IDTarget, IDUser: IDUser, IDMessage: IDMessage}))
+	json.NewEncoder(w).Encode(pool.Process(worker.DeleteMessagePayload{IDUser: IDUser, IDConversation: IDConversation, IDMessage: IDMessage}))
 }

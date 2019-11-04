@@ -6,3 +6,13 @@ func reverse(a []*interface{}) {
 		a[i], a[opp] = a[opp], a[i]
 	}
 }
+
+// ArrayContainsInt check if int exist in the array of int
+func ArrayContainsInt(a []int, x int) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}

@@ -30,7 +30,7 @@ func Start() {
 			closeServeWs(client.Msg, w, r)
 			return
 		}
-		serveWs(ShadowLands, client.Account, client.Conversation, client.Target, w, r)
+		serveWs(ShadowLands, client.Account, client.Conversation, client.Targets, w, r)
 	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))

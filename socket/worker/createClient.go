@@ -9,7 +9,7 @@ import (
 type CreateClientReturn struct {
 	Account      *models.Account
 	Conversation *models.Conversation
-	Target       []int
+	Targets      []int
 	Auth         bool
 	Msg          string
 }
@@ -50,20 +50,20 @@ func CreateClient(payload interface{}) interface{} {
 
 	middleware.Conversation = conversation
 
-	rooms, err := models.FindAllRoomsByIDConversation(conversation.ID)
+	_, targets, err := models.FindAllRoomsByIDConversation(conversation.ID)
 	if err != nil {
 		middleware.Msg = "Rooms not find"
 		return middleware
 	}
 
-	var target []int
-	for _, room := range rooms {
-		if room.IDAccount != account.ID {
-			target = append(target, room.IDAccount)
+	// remove user
+	for i, target := range targets {
+		if target == room.IDAccount {
+			targets = append(targets[:i], targets[i+1:]...)
 		}
 	}
 
-	middleware.Target = target
+	middleware.Targets = targets
 	middleware.Auth = true
 
 	return middleware

@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "1.0.0",
-  "description": "```tsx import { AwiseSocket } from './awiseSocket';",
+  "description": "awise-messenger",
   "main": "index.js",
   "scripts": {
     "dev": "set NODE_ENV=development &&parcel ./index.html --open --no-cache --no-hmr",

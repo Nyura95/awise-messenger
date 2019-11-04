@@ -107,11 +107,12 @@ func FindAllRoomsByIDAccount(IDAccount int) ([]*Room, error) {
 }
 
 // FindAllRoomsByIDConversation for find all rooms by id_account in the database
-func FindAllRoomsByIDConversation(IDConversation int) ([]*Room, error) {
+func FindAllRoomsByIDConversation(IDConversation int) ([]*Room, []int, error) {
 	rooms := []*Room{}
+	targets := []int{}
 	result, err := db.Query("SELECT id, id_conversation, id_account, token, created_at, updated_at FROM tbl_rooms WHERE id_conversation = ?", IDConversation)
 	if err != nil {
-		return rooms, err
+		return rooms, targets, err
 	}
 	defer result.Close()
 	for result.Next() {
@@ -121,8 +122,9 @@ func FindAllRoomsByIDConversation(IDConversation int) ([]*Room, error) {
 			panic(err.Error())
 		}
 		rooms = append(rooms, &room)
+		targets = append(targets, room.IDAccount)
 	}
-	return rooms, nil
+	return rooms, targets, nil
 }
 
 // Update a room

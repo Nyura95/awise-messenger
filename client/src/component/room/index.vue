@@ -93,13 +93,14 @@ export default {
       messages: [],
       accounts: {},
       open: false,
-      error: false
+      error: false,
+      conversation: 0
     };
   },
   methods: {
     update(id, message) {
       fetch(
-        "/api/v2/conversations/target/" + this.target + "/messages/" + id,
+        "/api/v2/conversations/" + this.conversation + "/messages/" + id,
         "put",
         {
           message
@@ -113,7 +114,7 @@ export default {
     },
     del(id) {
       fetch(
-        "/api/v2/conversations/target/" + this.target + "/messages/" + id,
+        "/api/v2/conversations/" + this.conversation + "/messages/" + id,
         "delete",
         {},
         {
@@ -146,6 +147,7 @@ export default {
           this.accounts[result.data.accounts[i].id] =
             result.data.accounts[i].firstname;
         }
+        this.conversation = result.data.id;
         console.log(result);
       });
     },
