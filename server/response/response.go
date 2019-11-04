@@ -11,8 +11,8 @@ type Response struct {
 
 // BasicResponse from API
 func BasicResponse(data interface{}, comment string, reason int) Response {
-	var success = false
-	var statusCode = 400
+	success := false
+	statusCode := 400
 	if reason == 1 {
 		success = true
 		statusCode = 200
