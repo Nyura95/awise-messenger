@@ -55,20 +55,9 @@ func (c *Client) readPump() {
 			break
 		}
 
-		message := string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))
-		if strings.Contains(message, "update") {
-			
-		}
-
-		switch os := runtime.GOOS; os {
-
-		}
-
-		// message = action.NewMessage(c.account.ID, c.conversation.ID, ).Send()
-		// c.send <- message
-		// for _, id := range c.target {
-		// 	c.hub.disseminateToTheTarget <- &DisseminateToTheTarget{target: id, message: message}
-		// }
+		message = action.NewMessage(c.account.ID, c.conversation.ID, string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))).Send()
+		c.send <- message
+		c.hub.disseminateToTheTargets <- &DisseminateToTheTargets{targets: c.target, message: message}
 	}
 }
 

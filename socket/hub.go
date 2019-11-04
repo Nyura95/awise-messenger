@@ -12,9 +12,9 @@ type DisseminateToTheOthers struct {
 	message     []byte
 }
 
-// DisseminateToTheTarget for send message to the target
-type DisseminateToTheTarget struct {
-	target  int
+// DisseminateToTheTargets for send message to the target
+type DisseminateToTheTargets struct {
+	targets []int
 	message []byte
 }
 
@@ -22,9 +22,9 @@ type DisseminateToTheTarget struct {
 type Hub struct {
 	clients map[*Client]bool
 
-	broadcast              chan []byte
-	disseminateToTheOthers chan *DisseminateToTheOthers
-	disseminateToTheTarget chan *DisseminateToTheTarget
+	broadcast               chan []byte
+	disseminateToTheOthers  chan *DisseminateToTheOthers
+	disseminateToTheTargets chan *DisseminateToTheTargets
 
 	register   chan *Client
 	unregister chan *Client
@@ -32,12 +32,12 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast:              make(chan []byte),
-		disseminateToTheOthers: make(chan *DisseminateToTheOthers),
-		disseminateToTheTarget: make(chan *DisseminateToTheTarget),
-		register:               make(chan *Client),
-		unregister:             make(chan *Client),
-		clients:                make(map[*Client]bool),
+		broadcast:               make(chan []byte),
+		disseminateToTheOthers:  make(chan *DisseminateToTheOthers),
+		disseminateToTheTargets: make(chan *DisseminateToTheTargets),
+		register:                make(chan *Client),
+		unregister:              make(chan *Client),
+		clients:                 make(map[*Client]bool),
 	}
 }
 
@@ -73,13 +73,15 @@ func (h *Hub) run() {
 					}
 				}
 			}
-		case disseminateToTheTarget := <-h.disseminateToTheTarget:
-			for client := range h.clients {
-				if client.account.ID == disseminateToTheTarget.target {
-					select {
-					case client.send <- disseminateToTheTarget.message:
-					default:
-						h.unregister <- client
+		case disseminateToTheTargets := <-h.disseminateToTheTargets:
+			for _, target := range disseminateToTheTargets.targets {
+				for client := range h.clients {
+					if client.account.ID == target {
+						select {
+						case client.send <- disseminateToTheTargets.message:
+						default:
+							h.unregister <- client
+						}
 					}
 				}
 			}
