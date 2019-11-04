@@ -65,7 +65,7 @@ func DeleteMessage(payload interface{}) interface{} {
 	if err != nil {
 		log.Printf("Error update message")
 		log.Println(err)
-		return response.BasicResponse(new(interface{}), "Error update message", -5)
+		return response.BasicResponse(new(interface{}), "Error update message", -6)
 	}
 
 	socket.ShadowLands.DisseminateToTheTargets <- &socket.DisseminateToTheTargets{Message: action.NewDelete(message).Send(), Targets: []int{account2.ID, account1.ID}}
