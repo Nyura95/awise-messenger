@@ -3,6 +3,8 @@ package worker
 import (
 	"awise-messenger/models"
 	"awise-messenger/server/response"
+	"awise-messenger/socket"
+	"awise-messenger/socket/action"
 	"log"
 )
 
@@ -63,5 +65,6 @@ func UpdateMessage(payload interface{}) interface{} {
 		return response.BasicResponse(new(interface{}), "Error update message", -5)
 	}
 
+	socket.ShadowLands.DisseminateToTheTargets <- &socket.DisseminateToTheTargets{Message: action.NewUpdate(message).Send(), Targets: []int{account2.ID, account1.ID}}
 	return message
 }

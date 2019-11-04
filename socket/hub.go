@@ -14,17 +14,17 @@ type DisseminateToTheOthers struct {
 
 // DisseminateToTheTargets for send message to the target
 type DisseminateToTheTargets struct {
-	targets []int
-	message []byte
+	Targets []int
+	Message []byte
 }
 
 // Hub of the clients
 type Hub struct {
 	clients map[*Client]bool
 
-	broadcast               chan []byte
+	Broadcast               chan []byte
 	disseminateToTheOthers  chan *DisseminateToTheOthers
-	disseminateToTheTargets chan *DisseminateToTheTargets
+	DisseminateToTheTargets chan *DisseminateToTheTargets
 
 	register   chan *Client
 	unregister chan *Client
@@ -32,9 +32,9 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast:               make(chan []byte),
+		Broadcast:               make(chan []byte),
 		disseminateToTheOthers:  make(chan *DisseminateToTheOthers),
-		disseminateToTheTargets: make(chan *DisseminateToTheTargets),
+		DisseminateToTheTargets: make(chan *DisseminateToTheTargets),
 		register:                make(chan *Client),
 		unregister:              make(chan *Client),
 		clients:                 make(map[*Client]bool),
@@ -73,19 +73,21 @@ func (h *Hub) run() {
 					}
 				}
 			}
-		case disseminateToTheTargets := <-h.disseminateToTheTargets:
-			for _, target := range disseminateToTheTargets.targets {
-				for client := range h.clients {
-					if client.account.ID == target {
-						select {
-						case client.send <- disseminateToTheTargets.message:
-						default:
-							h.unregister <- client
+		case disseminateToTheTargets := <-h.DisseminateToTheTargets:
+			for _, target := range disseminateToTheTargets.Targets {
+				if info.Infos.Alive(target) {
+					for client := range h.clients {
+						if client.account.ID == target {
+							select {
+							case client.send <- disseminateToTheTargets.Message:
+							default:
+								h.unregister <- client
+							}
 						}
 					}
 				}
 			}
-		case message := <-h.broadcast:
+		case message := <-h.Broadcast:
 			for client := range h.clients {
 				select {
 				case client.send <- message:

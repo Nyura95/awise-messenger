@@ -11,12 +11,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Shadowlands is a socket hub
+var ShadowLands = newHub()
+
 // Start the socket server
 func Start() {
 	config, _ := config.GetConfig()
 
-	hub := newHub()
-	go hub.run()
+	go ShadowLands.run()
 
 	r := mux.NewRouter()
 
@@ -28,7 +30,7 @@ func Start() {
 			closeServeWs(client.Msg, w, r)
 			return
 		}
-		serveWs(hub, client.Account, client.Conversation, client.Target, w, r)
+		serveWs(ShadowLands, client.Account, client.Conversation, client.Target, w, r)
 	})
 
 	log.Println("Start Socket server on localhost:" + strconv.Itoa(config.SocketPort))

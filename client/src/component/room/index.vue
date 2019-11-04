@@ -25,14 +25,14 @@
           <div class="col-12" v-if="message.idAccount === id">
             <div class="row">
               <div class="col-auto message">
-                <span>{{message.message}}</span>
+                <span @click="update(message.id, 'update')">{{message.message}}</span>
               </div>
             </div>
           </div>
           <div class="col-12" v-if="message.idAccount !== id">
             <div class="row">
-              <div class="col-auto left message target" :click="update(message.idAccount, 'test')">
-                <span>{{message.message}}</span>
+              <div class="col-auto left message target">
+                <span @click="update(message.id, 'update')">{{message.message}}</span>
               </div>
             </div>
           </div>
@@ -98,7 +98,18 @@ export default {
   },
   methods: {
     update(id, message) {
-      // this.socket.sendAction("update", { id, message });
+      fetch(
+        "/api/v2/conversations/target/" + this.target + "/messages/" + id,
+        "put",
+        {
+          message
+        },
+        {
+          Authorization: this.tokenApi
+        }
+      ).then(result => {
+        console.log(result);
+      });
     },
     sendMessage() {
       this.socket.send(this.message);
@@ -148,6 +159,15 @@ export default {
       this.socket.message = message => {
         this.message = "";
         this.messages.push(message);
+      };
+
+      this.socket.update = message => {
+        for (let i = 0; i < this.messages.length; i++) {
+          if (message.id === this.messages[i].id) {
+            this.messages[i] = message;
+          }
+        }
+        this.messages = [...this.messages];
       };
 
       this.socket.connection = user => {
