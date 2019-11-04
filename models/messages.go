@@ -58,19 +58,24 @@ func FindAllMessageByIDConversation(IDConversation int, nb int, page int) ([]*Me
 	messages := []*Message{}
 
 	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM tbl_messages WHERE id_conversation = ?", IDConversation).Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM tbl_messages WHERE id_conversation = ? AND `delete` = 0", IDConversation).Scan(&count)
 	if err != nil {
 		return messages, err
 	}
-	nbMaxPage := count / nb
 
+	nbMaxPage := count / nb
+	if count%nb > 0 {
+		nbMaxPage = nbMaxPage + 1
+	}
 	if page == 0 {
 		page = 1
 	}
+
 	if page > nbMaxPage {
 		page = nbMaxPage
 	}
 	offset := page*nb - nb
+
 	if offset < 0 {
 		offset = 0
 	}
