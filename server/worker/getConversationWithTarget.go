@@ -43,7 +43,7 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 	}
 
 	if conversation.ID == 0 {
-		conversation, err := models.CreateConversation(helpers.Uniqhash(account1.ID, account2.ID), "", "", 0, 0, 1, 0)
+		conversation, err = models.CreateConversation(helpers.Uniqhash(account1.ID, account2.ID), "", "", 0, 0, 1, 0)
 		if err != nil {
 			log.Println("Error create conversation")
 			log.Println(err)
