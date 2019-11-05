@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"awise-messenger/enum"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
 	"log"
@@ -23,7 +24,7 @@ func GetConversation(payload interface{}) interface{} {
 	}
 
 	var wg sync.WaitGroup
-	conversations := []*models.Conversation{}
+	conversations := []*models.ConversationWithAllInfos{}
 	wg.Add(len(rooms))
 	for _, room := range rooms {
 		go func(IDConversation int) {
@@ -35,7 +36,33 @@ func GetConversation(payload interface{}) interface{} {
 				return
 			}
 			if conversation.ID != 0 {
-				conversations = append(conversations, conversation)
+				// get all rooms for this conversation
+				rooms, _, _ := models.FindAllRoomsByIDConversation(conversation.ID)
+
+				// search for conversation accounts
+				var wg2 sync.WaitGroup
+				accounts := []*models.Account{}
+				token := ""
+				wg2.Add(len(rooms))
+				for _, room := range rooms {
+					if room.IDAccount == context.IDUser {
+						token = room.Token
+					}
+					go func(IDAccount int) {
+						defer wg2.Done()
+						account, _ := models.FindAccount(IDAccount)
+						accounts = append(accounts, account)
+					}(room.IDAccount)
+				}
+
+				// find all messages for this conversation
+				messages, _ := models.FindAllMessageByIDConversation(conversation.ID, enum.NbMessages, 1)
+
+				// wait the accounts search
+				wg2.Wait()
+
+				// add the ConversationWithAllInfos
+				conversations = append(conversations, &models.ConversationWithAllInfos{Conversation: conversation, Messages: messages, Accounts: accounts, Token: token})
 			}
 		}(room.IDConversation)
 	}

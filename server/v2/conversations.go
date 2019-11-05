@@ -32,13 +32,27 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 
 	pool := helpers.CreateWorkerPool(worker.GetConversationWithATarget)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.GetConversationWithATargetPayload{IDUser: IDUser, IDTarget: IDTarget}))
+
+	basicResponse := pool.Process(worker.GetConversationWithATargetPayload{IDUser: IDUser, IDTarget: IDTarget}).(response.Response)
+	if basicResponse.Success == false {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	json.NewEncoder(w).Encode(basicResponse)
 }
 
 // GetConversation get all conversation for users
 func GetConversation(w http.ResponseWriter, r *http.Request) {
 	IDUser := context.Get(r, "IDUser").(int)
+
 	pool := helpers.CreateWorkerPool(worker.GetConversation)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.GetConversationPayload{IDUser: IDUser}))
+
+	basicResponse := pool.Process(worker.GetConversationPayload{IDUser: IDUser}).(response.Response)
+	log.Println(basicResponse)
+	if basicResponse.Success == false {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	json.NewEncoder(w).Encode(basicResponse)
 }

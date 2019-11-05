@@ -22,9 +22,9 @@ type Conversation struct {
 // ConversationWithAllInfos it's the conversation with all infos
 type ConversationWithAllInfos struct {
 	*Conversation
-	Token    string      `json:"token"`
-	Messages []*Message  `json:"messages"`
-	Accounts [2]*Account `json:"accounts"`
+	Token    string     `json:"token"`
+	Messages []*Message `json:"messages"`
+	Accounts []*Account `json:"accounts"`
 }
 
 // ConversationWithTokenRoom for print a conversation with the token room for a user

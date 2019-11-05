@@ -32,7 +32,13 @@ func GetMessages(w http.ResponseWriter, r *http.Request) {
 
 	pool := helpers.CreateWorkerPool(worker.GetMessages)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.GetMessagesPayload{IDUser: IDUser, IDConversation: IDConversation, Page: page}))
+
+	basicResponse := pool.Process(worker.GetMessagesPayload{IDUser: IDUser, IDConversation: IDConversation, Page: page}).(response.Response)
+	if basicResponse.Success == false {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	json.NewEncoder(w).Encode(basicResponse)
 }
 
 // UpdateMessage for update a message
@@ -53,7 +59,13 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 
 	pool := helpers.CreateWorkerPool(worker.UpdateMessage)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.UpdateMessagePayload{IDConversation: IDConversation, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}))
+
+	basicResponse := pool.Process(worker.UpdateMessagePayload{IDConversation: IDConversation, IDUser: IDUser, IDMessage: IDMessage, Message: body.Message}).(response.Response)
+	if basicResponse.Success == false {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	json.NewEncoder(w).Encode(basicResponse)
 }
 
 // DeleteMessage for update a message
@@ -72,5 +84,11 @@ func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 
 	pool := helpers.CreateWorkerPool(worker.DeleteMessage)
 	defer pool.Close()
-	json.NewEncoder(w).Encode(pool.Process(worker.DeleteMessagePayload{IDUser: IDUser, IDConversation: IDConversation, IDMessage: IDMessage}))
+
+	basicResponse := pool.Process(worker.DeleteMessagePayload{IDUser: IDUser, IDConversation: IDConversation, IDMessage: IDMessage}).(response.Response)
+	if basicResponse.Success == false {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	json.NewEncoder(w).Encode(basicResponse)
 }

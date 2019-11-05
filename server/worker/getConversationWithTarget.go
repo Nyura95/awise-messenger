@@ -76,7 +76,7 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 		return response.BasicResponse(new(interface{}), "Error find messages conversation", -6)
 	}
 
-	var accounts [2]*models.Account
+	var accounts []*models.Account
 	accounts[0] = account1
 	accounts[1] = account2
 
