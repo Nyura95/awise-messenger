@@ -2,9 +2,11 @@ CREATE TABLE tbl_conversations (
 	id int(11) NOT NULL AUTO_INCREMENT,
 	uniq_hash varchar(255) NOT NULL,
 	title varchar(255) NOT NULL,
+	image varchar(255) NOT NULL,
 	id_last_message int(11),
 	id_first_message int(11),
 	id_status int(11) NOT NULL,
+	`delete` int (1) NOT NULL,
 	created_at DATETIME,
 	updated_at DATETIME,
 	PRIMARY key(id)

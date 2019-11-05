@@ -28,13 +28,18 @@ func Start() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.IsGoodToken)
 
+	// Account
 	r.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
-
+	// conversation
+	r.HandleFunc("/api/v2/conversations", v2.GetConversation).Methods("GET")
+	r.HandleFunc("/api/v2/conversations/{IDConversation}", v2.GetConversationWithATarget).Methods("PUT") // TMP
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
-
+	// Message
 	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{page}", v2.GetMessages).Methods("GET")
 	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{IDMessage}", v2.UpdateMessage).Methods("PUT")
 	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{IDMessage}", v2.DeleteMessage).Methods("DELETE")
+	// Multirooms
+	r.HandleFunc("/api/v2/conversations/multi", v2.DeleteMessage).Methods("POST") // TMP
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")

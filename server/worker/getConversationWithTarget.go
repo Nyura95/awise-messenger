@@ -43,7 +43,7 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 	}
 
 	if conversation.ID == 0 {
-		conversation, err := models.CreateConversation(helpers.Uniqhash(account1.ID, account2.ID), "", 0, 0, 1)
+		conversation, err := models.CreateConversation(helpers.Uniqhash(account1.ID, account2.ID), "", "", 0, 0, 1, 0)
 		if err != nil {
 			log.Println("Error create conversation")
 			log.Println(err)
@@ -80,5 +80,5 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 	accounts[0] = account1
 	accounts[1] = account2
 
-	return response.BasicResponse(models.ConversationWithToken{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1)
+	return response.BasicResponse(models.ConversationWithAllInfos{Conversation: conversation, Accounts: accounts, Messages: messages, Token: room.Token}, "ok", 1)
 }

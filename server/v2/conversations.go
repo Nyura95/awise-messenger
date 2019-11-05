@@ -34,3 +34,11 @@ func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 	defer pool.Close()
 	json.NewEncoder(w).Encode(pool.Process(worker.GetConversationWithATargetPayload{IDUser: IDUser, IDTarget: IDTarget}))
 }
+
+// GetConversation get all conversation for users
+func GetConversation(w http.ResponseWriter, r *http.Request) {
+	IDUser := context.Get(r, "IDUser").(int)
+	pool := helpers.CreateWorkerPool(worker.GetConversation)
+	defer pool.Close()
+	json.NewEncoder(w).Encode(pool.Process(worker.GetConversationPayload{IDUser: IDUser}))
+}
