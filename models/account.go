@@ -3,6 +3,7 @@ package models
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"sync"
 	"time"
 )
 
@@ -59,6 +60,29 @@ func FindAllAccount() ([]*Account, error) {
 		accounts = append(accounts, &account)
 	}
 	return accounts, nil
+}
+
+// CheckAccountExist check if account exist
+func CheckAccountExist(IDAccounts ...int) bool {
+	jobs := make(chan bool, len(IDAccounts))
+	defer close(jobs)
+
+	var wg sync.WaitGroup
+	wg.Add(len(IDAccounts))
+
+	for _, IDAccount := range IDAccounts {
+		go func(IDAccount int) {
+			defer wg.Done()
+			account, err := FindAccount(IDAccount)
+			if err != nil || account.ID == 0 {
+				jobs <- false
+			}
+		}(IDAccount)
+	}
+
+	wg.Wait()
+
+	return len(jobs) == 0
 }
 
 // Update a user

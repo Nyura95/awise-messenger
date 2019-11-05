@@ -49,7 +49,6 @@ func GetConversation(w http.ResponseWriter, r *http.Request) {
 	defer pool.Close()
 
 	basicResponse := pool.Process(worker.GetConversationPayload{IDUser: IDUser}).(response.Response)
-	log.Println(basicResponse)
 	if basicResponse.Success == false {
 		w.WriteHeader(http.StatusBadRequest)
 	}

@@ -2,8 +2,8 @@ package models
 
 import (
 	"awise-messenger/helpers"
-	"errors"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -170,15 +170,23 @@ func CreateRoom(IDConversation int, IDAccount int, token string) (*Room, error) 
 }
 
 // CreateRoomForMultipleAccount dsq
-func CreateRoomForMultipleAccount(IDConversation int, IDAccounts ...int) error {
+func CreateRoomForMultipleAccount(IDConversation int, IDAccounts ...int) chan error {
+	var wg sync.WaitGroup
+	wg.Add(len(IDAccounts))
+
+	errors := make(chan error, len(IDAccounts))
+	defer close(errors)
+
 	for _, IDAccount := range IDAccounts {
-		room, err := CreateRoom(IDConversation, IDAccount, helpers.Token(strconv.Itoa(IDConversation)+":"+strconv.Itoa(IDAccount)+"randomstring"))
-		if err != nil {
-			return err
-		}
-		if room.ID == 0 {
-			return errors.New("Error during creating a new room")
-		}
+		go func(IDConversation int, IDAccount int) {
+			defer wg.Done()
+			_, err := CreateRoom(IDConversation, IDAccount, helpers.Token(strconv.Itoa(IDConversation)+":"+strconv.Itoa(IDAccount)+"randomstring"))
+			if err != nil {
+				errors <- err
+			}
+		}(IDConversation, IDAccount)
 	}
-	return nil
+	wg.Wait()
+
+	return errors
 }
