@@ -55,6 +55,11 @@ func (c *Client) readPump() {
 			break
 		}
 
+		// message empty
+		if len(message) == 0 {
+			continue
+		}
+
 		message = action.NewMessage(c.account.ID, c.conversation.ID, string(bytes.TrimSpace(bytes.Replace(message, newline, space, -1)))).Send()
 		c.send <- message
 		c.hub.DisseminateToTheTargets <- &DisseminateToTheTargets{Targets: c.target, Message: message}

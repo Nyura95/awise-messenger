@@ -25,14 +25,14 @@
           <div class="col-12" v-if="message.idAccount === id">
             <div class="row">
               <div class="col-auto message">
-                <span @click="del(message.id, 'update')">{{message.message}}</span>
+                <span @click="updateMessage(message.id)">{{message.message}}</span>
               </div>
             </div>
           </div>
           <div class="col-12" v-if="message.idAccount !== id">
             <div class="row">
               <div class="col-auto left message target">
-                <span @click="del(message.id, 'update')">{{message.message}}</span>
+                <span @click="updateMessage(message.id)">{{message.message}}</span>
               </div>
             </div>
           </div>
@@ -98,6 +98,13 @@ export default {
     };
   },
   methods: {
+    updateMessage(id) {
+      if (this.message !== "") {
+        this.update(id, this.message);
+        return;
+      }
+      this.del(id);
+    },
     update(id, message) {
       fetch(
         "/api/v2/conversations/" + this.conversation + "/messages/" + id,
@@ -125,7 +132,9 @@ export default {
       });
     },
     sendMessage() {
-      this.socket.send(this.message);
+      if (this.message !== "") {
+        this.socket.send(this.message);
+      }
     },
     close() {
       if (this.socket) {

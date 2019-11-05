@@ -1,0 +1,9 @@
+empty message
+multirooms
+  - create multirooms
+  - get multirooms
+  - update multirooms
+private mode
+authentification
+emoji back
+message state
