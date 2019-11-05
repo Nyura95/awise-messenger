@@ -4,7 +4,7 @@
       <div class="col-5 mx-auto room">
         <Room
           name="Alexis"
-          token="j_MuTU05PMBfh_A5t6077B4R5tw="
+          token="2Ds8UdMJQ3i40TOzEOFTe8aYVw4="
           tokenApi="token1"
           :target="2"
           :id="1"
@@ -13,7 +13,7 @@
       <div class="col-5 mx-auto room">
         <Room
           name="Valentin"
-          token="1ouZBXoXyqX7iyW3m2BH1O7Xakk="
+          token="J62tKYjZbp99mEClnHSks4E_XAU="
           tokenApi="token2"
           :target="1"
           :id="2"

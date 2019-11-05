@@ -21,12 +21,6 @@ type UpdateMessagePayload struct {
 func UpdateMessage(payload interface{}) interface{} {
 	context := payload.(UpdateMessagePayload)
 
-	conversation, err := models.FindConversation(context.IDConversation)
-	if err != nil || conversation.ID == 0 {
-		log.Println("Error, conversion not found")
-		return response.BasicResponse(new(interface{}), "conversion not found", -1)
-	}
-
 	_, targets, err := models.FindAllRoomsByIDConversation(context.IDConversation)
 	if err != nil {
 		log.Println("Error, room not found")
@@ -52,7 +46,6 @@ func UpdateMessage(payload interface{}) interface{} {
 	}
 
 	message.Message = context.Message
-
 	err = message.Update()
 	if err != nil {
 		log.Printf("Error, update message")

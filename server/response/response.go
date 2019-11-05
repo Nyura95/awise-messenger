@@ -17,6 +17,6 @@ func BasicResponse(data interface{}, comment string, reason int) Response {
 		success = true
 		statusCode = 200
 	}
-	basicResponse := Response{statusCode, reason, comment, success, data}
+	basicResponse := Response{StatusCode: statusCode, Reason: reason, Comment: comment, Success: success, Data: data}
 	return basicResponse
 }

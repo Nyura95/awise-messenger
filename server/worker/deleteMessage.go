@@ -14,18 +14,11 @@ type DeleteMessagePayload struct {
 	IDUser         int
 	IDConversation int
 	IDMessage      int
-	Message        string
 }
 
 // DeleteMessage return a basic response
 func DeleteMessage(payload interface{}) interface{} {
 	context := payload.(DeleteMessagePayload)
-
-	conversation, err := models.FindConversation(context.IDConversation)
-	if err != nil || conversation.ID == 0 {
-		log.Println("Error, conversion not found")
-		return response.BasicResponse(new(interface{}), "conversion not found", -1)
-	}
 
 	_, targets, err := models.FindAllRoomsByIDConversation(context.IDConversation)
 	if err != nil {

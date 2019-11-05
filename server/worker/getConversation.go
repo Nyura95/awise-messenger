@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"awise-messenger/enum"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
 	"log"
@@ -56,7 +55,7 @@ func GetConversation(payload interface{}) interface{} {
 				}
 
 				// find all messages for this conversation
-				messages, _ := models.FindAllMessageByIDConversation(conversation.ID, enum.NbMessages, 1)
+				messages, _ := models.FindAllMessageByIDConversation(conversation.ID, 1, 1)
 
 				// wait the accounts search
 				wg2.Wait()
