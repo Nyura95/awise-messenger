@@ -33,6 +33,7 @@ func Start() {
 	// conversation
 	r.HandleFunc("/api/v2/conversations", v2.GetConversations).Methods("GET")
 	r.HandleFunc("/api/v2/conversations/{IDConversation}", v2.GetConversation).Methods("GET")
+	r.HandleFunc("/api/v2/conversations/{IDConversation}", v2.UpdateConversation).Methods("PUT")
 	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
 	// Message
 	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{page}", v2.GetMessages).Methods("GET")

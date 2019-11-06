@@ -18,6 +18,11 @@ type startConversationInMultiRoom struct {
 	IDTargets []int
 }
 
+type updateConversation struct {
+	Title string
+	Image string
+}
+
 // GetConversationWithATarget get or create a conversation with a other account
 func GetConversationWithATarget(w http.ResponseWriter, r *http.Request) {
 	IDUser := context.Get(r, "IDUser").(int)
@@ -99,6 +104,32 @@ func StartConversationInMultiRoom(w http.ResponseWriter, r *http.Request) {
 	defer pool.Close()
 
 	basicResponse := pool.Process(worker.CreateConversationInMultiRoomPayload{IDUser: IDUser, IDAccounts: body.IDTargets}).(response.Response)
+	if basicResponse.Success == false {
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	json.NewEncoder(w).Encode(basicResponse)
+}
+
+// UpdateConversation update the conversation by IDConversation
+func UpdateConversation(w http.ResponseWriter, r *http.Request) {
+	IDUser := context.Get(r, "IDUser").(int)
+	IDConversation, err := strconv.Atoi(mux.Vars(r)["IDConversation"])
+
+	if err != nil {
+		log.Printf("The IDConversation is not valid")
+		json.NewEncoder(w).Encode(response.BasicResponse(new(interface{}), "The IDConversation is not valid", -1))
+		return
+	}
+
+	var body updateConversation
+	decoder := json.NewDecoder(r.Body)
+	decoder.Decode(&body)
+
+	pool := helpers.CreateWorkerPool(worker.UpdateConversation)
+	defer pool.Close()
+
+	basicResponse := pool.Process(worker.UpdateConversationPayload{IDUser: IDUser, IDConversation: IDConversation, Title: body.Title, Image: body.Image}).(response.Response)
 	if basicResponse.Success == false {
 		w.WriteHeader(http.StatusBadRequest)
 	}

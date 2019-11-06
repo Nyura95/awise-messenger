@@ -1,7 +1,7 @@
-multirooms
-  - create multirooms
-  - get multirooms
-  - update multirooms
+multirooms ok
+  - create multirooms ok
+  - get multirooms ok
+  - update multirooms ok 
 private mode
 authentification
 emoji back
