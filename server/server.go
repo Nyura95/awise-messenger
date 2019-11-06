@@ -24,23 +24,29 @@ func Start() {
 	headersOk := handlers.AllowedHeaders([]string{"authorization", "content-type"})
 
 	// middleware
-	r.Use(middleware.BasicHeader)
-	r.Use(middleware.Logger)
-	r.Use(middleware.IsGoodToken)
+	r.Use(middleware.BasicHeader, middleware.Logger)
+
+	// create sub router
+	public := r.PathPrefix("/").Subrouter()
+	private := r.PathPrefix("/").Subrouter()
+	private.Use(middleware.IsGoodToken)
+
+	// Login
+	public.HandleFunc("/api/v2/login", v2.Login).Methods("POST")
 
 	// Account
-	r.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
+	private.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
 	// conversation
-	r.HandleFunc("/api/v2/conversations", v2.GetConversations).Methods("GET")
-	r.HandleFunc("/api/v2/conversations/{IDConversation}", v2.GetConversation).Methods("GET")
-	r.HandleFunc("/api/v2/conversations/{IDConversation}", v2.UpdateConversation).Methods("PUT")
-	r.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
+	private.HandleFunc("/api/v2/conversations", v2.GetConversations).Methods("GET")
+	private.HandleFunc("/api/v2/conversations/{IDConversation}", v2.GetConversation).Methods("GET")
+	private.HandleFunc("/api/v2/conversations/{IDConversation}", v2.UpdateConversation).Methods("PUT")
+	private.HandleFunc("/api/v2/conversations/target/{IDTarget}", v2.GetConversationWithATarget).Methods("GET")
 	// Message
-	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{page}", v2.GetMessages).Methods("GET")
-	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{IDMessage}", v2.UpdateMessage).Methods("PUT")
-	r.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{IDMessage}", v2.DeleteMessage).Methods("DELETE")
+	private.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{page}", v2.GetMessages).Methods("GET")
+	private.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{IDMessage}", v2.UpdateMessage).Methods("PUT")
+	private.HandleFunc("/api/v2/conversations/{IDConversation}/messages/{IDMessage}", v2.DeleteMessage).Methods("DELETE")
 	// Multirooms
-	r.HandleFunc("/api/v2/conversations/multi", v2.StartConversationInMultiRoom).Methods("POST")
+	private.HandleFunc("/api/v2/conversations/multi", v2.StartConversationInMultiRoom).Methods("POST")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")
