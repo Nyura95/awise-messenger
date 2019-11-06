@@ -9,23 +9,25 @@ import (
 	"sync"
 )
 
-// GetConversationWithATargetPayload for call GetConversationWithATarget
-type GetConversationWithATargetPayload struct {
-	IDUser   int
-	IDTarget int
+// CreateConversationInMultiRoomPayload for call CreateConversationInMultiRoom
+type CreateConversationInMultiRoomPayload struct {
+	IDUser     int
+	IDAccounts []int
 }
 
-// GetConversationWithATarget return a basic response
-func GetConversationWithATarget(payload interface{}) interface{} {
-	context := payload.(GetConversationWithATargetPayload)
+// CreateConversationInMultiRoom return a basic response
+func CreateConversationInMultiRoom(payload interface{}) interface{} {
+	context := payload.(CreateConversationInMultiRoomPayload)
+
+	context.IDAccounts = append(context.IDAccounts, context.IDUser)
 
 	// check if user exist
-	if exist := models.CheckAccountExist(context.IDTarget); exist == false {
+	if exist := models.CheckAccountExist(context.IDAccounts...); exist == false {
 		log.Println("Error, account of the target not find")
 		return response.BasicResponse(new(interface{}), "Target not find", -1)
 	}
 
-	conversation, err := models.FindConversationByHash(helpers.Uniqhash(context.IDUser, context.IDTarget))
+	conversation, err := models.FindConversationByHash(helpers.Uniqhash(context.IDAccounts...))
 	if err != nil {
 		log.Println("Error fetch conversation")
 		log.Println(err)
@@ -33,7 +35,7 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 	}
 
 	if conversation.ID == 0 {
-		conversation, err = models.CreateConversation(helpers.Uniqhash(context.IDUser, context.IDTarget), "", "", 0, 0, 1, 0)
+		conversation, err = models.CreateConversation(helpers.Uniqhash(context.IDAccounts...), "", "", 0, 0, 1, 0)
 		if err != nil {
 			log.Println("Error create conversation")
 			log.Println(err)
@@ -44,7 +46,7 @@ func GetConversationWithATarget(payload interface{}) interface{} {
 			return response.BasicResponse(new(interface{}), "Error create conversation", -3)
 		}
 
-		errors := models.CreateRoomForMultipleAccount(conversation.ID, context.IDUser, context.IDTarget)
+		errors := models.CreateRoomForMultipleAccount(conversation.ID, context.IDAccounts...)
 		if len(errors) != 0 {
 			log.Println("Error create rooms")
 			for err := range errors {

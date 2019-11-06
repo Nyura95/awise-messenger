@@ -18,6 +18,9 @@
           <router-link :to="{ name: 'multi' }" active-class="active" class="nav-item" tag="li">
             <a class="nav-link">Multi</a>
           </router-link>
+          <router-link :to="{ name: 'charge' }" active-class="active" class="nav-item" tag="li">
+            <a class="nav-link">Charge</a>
+          </router-link>
         </ul>
         <span class="navbar-text">
           <a class="btn btn-secondary" href="#" @click.prevent="logout">

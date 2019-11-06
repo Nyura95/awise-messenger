@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/sha1"
 	"encoding/base64"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -21,12 +22,11 @@ type ConversationFront struct {
 }
 
 // Uniqhash for get the uniq_hash conversation
-func Uniqhash(IDAccount1 int, IDAccount2 int) string {
-	var hash string
-	if IDAccount1 > IDAccount2 {
-		hash = strconv.Itoa(IDAccount2) + strconv.Itoa(IDAccount1)
-	} else {
-		hash = strconv.Itoa(IDAccount1) + strconv.Itoa(IDAccount2)
+func Uniqhash(IDAccounts ...int) string {
+	hash := ""
+	sort.Sort(sort.Reverse(sort.IntSlice(IDAccounts)))
+	for _, IDAccount := range IDAccounts {
+		hash += strconv.Itoa(IDAccount)
 	}
 	return hash
 }

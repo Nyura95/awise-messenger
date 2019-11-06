@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"awise-messenger/enum"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
 	"log"
@@ -9,64 +10,63 @@ import (
 
 // GetConversationPayload for call GetConversation
 type GetConversationPayload struct {
-	IDUser int
+	IDUser         int
+	IDConversation int
 }
 
 // GetConversation return a basic response
 func GetConversation(payload interface{}) interface{} {
 	context := payload.(GetConversationPayload)
 
-	rooms, err := models.FindAllRoomsByIDAccount(context.IDUser)
+	rooms, _, err := models.FindAllRoomsByIDConversation(context.IDConversation)
 	if err != nil {
 		log.Println("Error fetch rooms")
+		log.Println(err)
 		return response.BasicResponse(new(interface{}), "Error fetch rooms", -1)
 	}
 
+	if len(rooms) == 0 {
+		log.Println("Error, rooms not find")
+		return response.BasicResponse(new(interface{}), "Error rooms not find", -1)
+	}
+
+	conversation, err := models.FindConversation(context.IDConversation)
+	if err != nil {
+		log.Println("Error fetch conversation")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error fetch conversation", -2)
+	}
+
+	if conversation.ID == 0 {
+		log.Println("Error, conversation not find")
+		return response.BasicResponse(new(interface{}), "Error conversation not find", -2)
+	}
+
 	var wg sync.WaitGroup
-	conversations := []*models.ConversationWithAllInfos{}
 	wg.Add(len(rooms))
+	accounts := []*models.Account{}
+	token := ""
 	for _, room := range rooms {
-		go func(IDConversation int) {
+		if room.IDAccount == context.IDUser {
+			token = room.Token
+			wg.Done()
+			continue
+		}
+		go func(IDAccount int) {
 			defer wg.Done()
-			conversation, err := models.FindConversation(IDConversation)
-			if err != nil {
-				log.Printf("Error, get conversation failed (%d)", IDConversation)
-				log.Println(err)
-				return
-			}
-			if conversation.ID != 0 {
-				// get all rooms for this conversation
-				rooms, _, _ := models.FindAllRoomsByIDConversation(conversation.ID)
+			account, _ := models.FindAccount(IDAccount)
+			accounts = append(accounts, account)
+		}(room.IDAccount)
+	}
 
-				// search for conversation accounts
-				var wg2 sync.WaitGroup
-				accounts := []*models.Account{}
-				token := ""
-				wg2.Add(len(rooms))
-				for _, room := range rooms {
-					if room.IDAccount == context.IDUser {
-						token = room.Token
-					}
-					go func(IDAccount int) {
-						defer wg2.Done()
-						account, _ := models.FindAccount(IDAccount)
-						accounts = append(accounts, account)
-					}(room.IDAccount)
-				}
-
-				// find all messages for this conversation
-				messages, _ := models.FindAllMessageByIDConversation(conversation.ID, 1, 1)
-
-				// wait the accounts search
-				wg2.Wait()
-
-				// add the ConversationWithAllInfos
-				conversations = append(conversations, &models.ConversationWithAllInfos{Conversation: conversation, Messages: messages, Accounts: accounts, Token: token})
-			}
-		}(room.IDConversation)
+	messages, err := models.FindAllMessageByIDConversation(context.IDConversation, enum.NbMessages, 1)
+	if err != nil {
+		log.Println("Error fetch messages")
+		log.Println(err)
+		return response.BasicResponse(new(interface{}), "Error fetch messages", -3)
 	}
 
 	wg.Wait()
 
-	return response.BasicResponse(conversations, "ok", 1)
+	return response.BasicResponse(models.ConversationWithAllInfos{Conversation: conversation, Accounts: accounts, Token: token, Messages: messages}, "ok", 1)
 }

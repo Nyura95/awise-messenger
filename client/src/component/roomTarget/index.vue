@@ -52,12 +52,12 @@
 import { fetch } from "../../plugings/request";
 import AwiseSocket from "../../plugings/socket/index";
 export default {
-  name: "Room",
+  name: "RoomTarget",
   props: {
     id: Number,
     name: String,
     token: String,
-    idconversation: Number,
+    target: Number,
     tokenApi: String
   },
   mounted: function() {
@@ -144,7 +144,7 @@ export default {
     },
     chargeMessage() {
       fetch(
-        "/api/v2/conversations/" + this.idconversation,
+        "/api/v2/conversations/target/" + this.target,
         "get",
         {},
         {

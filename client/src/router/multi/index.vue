@@ -1,24 +1,31 @@
 <template>
   <Layout>
     <div class="row">
-      <div class="col-5 mx-auto room">
-        <Multirooms
+      <div class="col-4 mx-auto room">
+        <Room
           name="Alexis"
-          token="j_MuTU05PMBfh_A5t6077B4R5tw="
+          token="AjfWc_6mhy5hCQRMSiE7nWPBc4Y="
           tokenApi="token1"
-          :target="2"
+          :idconversation="16"
           :id="1"
-          :nbCustomers="110"
         />
       </div>
-      <div class="col-5 mx-auto room">
-        <Multirooms
+      <div class="col-4 mx-auto room">
+        <Room
           name="Valentin"
-          token="1ouZBXoXyqX7iyW3m2BH1O7Xakk="
+          token="4JT3d2Izhz62hptDVMLkv0dXt5s="
           tokenApi="token2"
-          :target="1"
+          :idconversation="16"
           :id="2"
-          :nbCustomers="115"
+        />
+      </div>
+      <div class="col-4 mx-auto room">
+        <Room
+          name="Steeven"
+          token="WoprbYZcYrlDqtsjky_H7WT5uwA="
+          tokenApi="token3"
+          :idconversation="16"
+          :id="3"
         />
       </div>
     </div>
@@ -27,13 +34,13 @@
 
 <script>
 import Layout from "../../layout";
-import Multirooms from "../../component/multirooms";
+import Room from "../../component/room";
 import { fetch } from "../../plugings/request";
 export default {
   name: "Home",
   components: {
     Layout,
-    Multirooms
+    Room
   },
   data: function() {
     return {};
