@@ -258,6 +258,7 @@ export default {
     margin-right: 5px;
     color: white;
     font-weight: 500;
+    overflow-wrap: break-word;
   }
 
   .target {

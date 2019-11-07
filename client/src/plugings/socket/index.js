@@ -1,3 +1,5 @@
+var { AES, enc } = require("crypto-js");
+
 /**
  *
  * Awise socket client
@@ -16,19 +18,20 @@ function AwiseSocket(uri, logger = true) {
     writable: false,
   });
   this._tokenConversation = null;
+  this._cryptKey = null;
   this.webSocket = null;
   this.logger = logger;
-  this.onerror = function() {};
-  this.onclose = function() {};
+  this.onerror = function () { };
+  this.onclose = function () { };
 
   // private action
-  this.message = function() {};
-  this.update = function() {};
-  this.delete = function() {};
-  this.private = function() {};
-  this.connection = function() {};
-  this.disconnection = function() {};
-  this.error = function() {};
+  this.message = function () { };
+  this.update = function () { };
+  this.delete = function () { };
+  this.private = function () { };
+  this.connection = function () { };
+  this.disconnection = function () { };
+  this.error = function () { };
 }
 
 /**
@@ -40,55 +43,60 @@ function AwiseSocket(uri, logger = true) {
  * @returns {void}
  * @author Nyura95
  */
-AwiseSocket.prototype.initConversation = function(token, callback) {
+AwiseSocket.prototype.initConversation = function (token, callback) {
   if (this.webSocket && this.webSocket.readyState === WebSocket.OPEN) {
     this.close();
   }
   this._tokenConversation = token;
   this._log('init conversation');
   this.webSocket = new WebSocket(this._uri + '/' + this._tokenConversation);
-  this.webSocket.onopen = function() {
+  this.webSocket.onopen = function () {
     callback();
   };
-  this.webSocket.onerror = function(event) {
+  this.webSocket.onerror = function (event) {
     this.onerror ? this.onerror(event) : null;
   }.bind(this);
-  this.webSocket.onclose = function(event) {
+  this.webSocket.onclose = function (event) {
     this.onclose ? this.onclose(event) : null;
   }.bind(this);
-  this.webSocket.onmessage = function(event) {
-    var messages = event.data.split('\n');
-    for (let i = 0; i < messages.length; i++) {
-      var message = '';
+  this.webSocket.onmessage = function (event) {
+    var actions = event.data.split('\n');
+    for (let i = 0; i < actions.length; i++) {
+      var action = '';
       try {
-        message = JSON.parse(messages[i]);
+        action = JSON.parse(actions[i]);
       } catch (err) {
-        console.log(messages);
-        this._log('error parsing message');
+        console.log(actions);
+        this._log('error parsing actions');
         break;
       }
-      this._log('new message receive (' + message.action + ')');
-      console.log(message);
-      if (message.action === 'message') {
-        this.message ? this.message(message.message) : null;
+      this._log('new message receive (' + action.action + ')');
+      console.log(action);
+      if (action.action === 'message') {
+
+        if (this._cryptKey) {
+          action.message.message = this._decrypt(action.message.message);
+        }
+
+        this.message(action.message);
       }
-      if (message.action === 'update') {
-        this.update(message.message);
+      if (action.action === 'update') {
+        this.update(action.message);
       }
-      if (message.action === 'delete') {
-        this.delete(message.message);
+      if (action.action === 'delete') {
+        this.delete(action.message);
       }
-      if (message.action === 'connection') {
-        this.connection(message.user);
+      if (action.action === 'connection') {
+        this.connection(action.user);
       }
-      if (message.action === 'disconnection') {
-        this.disconnection(message.user);
+      if (action.action === 'disconnection') {
+        this.disconnection(action.user);
       }
-      if (message.action === 'private') {
-        this.private(message.token);
+      if (action.action === 'private') {
+        this.privateMode(action.token);
       }
-      if (message.action === 'error') {
-        this.error(message.locKey, message.message);
+      if (action.action === 'error') {
+        this.error(action.locKey, action.message);
       }
     }
   }.bind(this);
@@ -102,13 +110,13 @@ AwiseSocket.prototype.initConversation = function(token, callback) {
  * @returns {void}
  * @author Nyura95
  */
-AwiseSocket.prototype.send = function(message) {
+AwiseSocket.prototype.send = function (message) {
   if (!this._tokenConversation && typeof this._tokenConversation !== 'number') {
     console.warn('You must target a conversation (use initConversation)');
     return;
   }
   this._log('send message : (' + message + ')');
-  this.webSocket ? this.webSocket.send(message) : null;
+  this.webSocket ? this.webSocket.send(this._cryptKey ? this._encrypt(message) : message) : null;
 };
 
 /**
@@ -118,11 +126,72 @@ AwiseSocket.prototype.send = function(message) {
  * @returns {void}
  * @author Nyura95
  */
-AwiseSocket.prototype.close = function() {
+AwiseSocket.prototype.close = function () {
   this._log('close');
   this.webSocket.close(1000, 'close user');
   this.webSocket = null;
 };
+
+/**
+ *
+ * Activate the private mode
+ * @param {string} token
+ * @version 1.0.0
+ * @returns {void}
+ * @author Nyura95
+ */
+AwiseSocket.prototype.privateMode = function (cryptKey) {
+  this._log('pivate mode');
+  if (confirm("Voulez-vous activer le private mode sur cette conversation ?")) {
+    this._cryptKey = cryptKey;
+    this.PrivateMode = true;
+    this.private(cryptKey);
+  }
+};
+
+/**
+ *
+ * Return if the private mode is active
+ * @version 1.0.0
+ * @author Nyura95
+ */
+AwiseSocket.prototype.PrivateMode = false;
+
+/**
+ *
+ * Encrypt a message
+ * @param {string} message
+ * @version 1.0.0
+ * @returns {void}
+ * @author Nyura95
+ * @private
+ */
+AwiseSocket.prototype._encrypt = function (message) {
+  this._log('encrypt message');
+  if (!this._tokenConversation || !this._cryptKey) {
+    console.warn('You must target a conversation and activate a private mode');
+    return null;
+  }
+  return AES.encrypt(message, this._cryptKey).toString();
+}
+
+/**
+ *
+ * Decrypt a message
+ * @param {string} message
+ * @version 1.0.0
+ * @returns {void}
+ * @author Nyura95
+ * @private
+ */
+AwiseSocket.prototype._decrypt = function (hash) {
+  this._log('decrypt message');
+  if (!this._tokenConversation || !this._cryptKey) {
+    console.warn('You must target a conversation and activate a private mode');
+    return null;
+  }
+  return AES.decrypt(hash, this._cryptKey).toString(enc.Utf8);
+}
 
 /**
  *
@@ -133,7 +202,7 @@ AwiseSocket.prototype.close = function() {
  * @author Nyura95
  * @private
  */
-AwiseSocket.prototype._log = function(...messages) {
+AwiseSocket.prototype._log = function (...messages) {
   if (console) {
     console.log(`[${this._tokenConversation || 'noToken'}]:`, ...messages);
   }

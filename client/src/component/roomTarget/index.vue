@@ -181,7 +181,13 @@ export default {
       };
 
       this.socket.private = token => {
-        console.log(token);
+        for (let i = 0; i < this.messages.length; i++) {
+          const decrypt = this.socket._decrypt(this.messages[i].message);
+          if (decrypt !== "") {
+            this.messages[i].message = decrypt;
+          }
+        }
+        this.messages = [...this.messages];
       };
 
       this.socket.update = message => {
@@ -262,6 +268,7 @@ export default {
     margin-right: 5px;
     color: white;
     font-weight: 500;
+    overflow-wrap: break-word;
   }
 
   .target {

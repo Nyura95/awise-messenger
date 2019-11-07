@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "bootstrap": "^4.3.1",
+    "crypto-js": "^3.1.9-1",
     "fetchival": "^0.3.3",
     "jquery": "^3.4.1",
     "popper.js": "^1.15.0",
