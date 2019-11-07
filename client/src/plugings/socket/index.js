@@ -25,6 +25,7 @@ function AwiseSocket(uri, logger = true) {
   this.message = function() {};
   this.update = function() {};
   this.delete = function() {};
+  this.private = function() {};
   this.connection = function() {};
   this.disconnection = function() {};
   this.error = function() {};
@@ -82,6 +83,9 @@ AwiseSocket.prototype.initConversation = function(token, callback) {
       }
       if (message.action === 'disconnection') {
         this.disconnection(message.user);
+      }
+      if (message.action === 'private') {
+        this.private(message.token);
       }
       if (message.action === 'error') {
         this.error(message.locKey, message.message);

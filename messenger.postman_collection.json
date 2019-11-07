@@ -8,10 +8,35 @@
 		{
 			"name": "create new account",
 			"request": {
-				"method": "GET",
-				"header": [],
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"avatars\": \"https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png\",\n\t\"firstname\": \"Test\",\n\t\"lastname\": \"Test\",\n\t\"username\": \"Test@test.fr\",\n\t\"password\": \"password\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": ""
+					"raw": "localhost:3000/api/v2/accounts",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v2",
+						"accounts"
+					]
 				}
 			},
 			"response": []
@@ -367,6 +392,91 @@
 						"2",
 						"messages",
 						"831"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get hash private mode",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "token1",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"strengh\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/v2/private/hash",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v2",
+						"private",
+						"hash"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "send hash private mode",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "token1",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"idconversation\": 16,\n\t\"token\": \"sdksjdmkqsjdksqdjsqmkdjqsdj\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/api/v2/private/hash/send",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v2",
+						"private",
+						"hash",
+						"send"
 					]
 				}
 			},

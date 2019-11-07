@@ -51,6 +51,7 @@ func Start() {
 
 	// private mode
 	private.HandleFunc("/api/v2/private/hash", v2.GetHashPrivateMode).Methods("POST")
+	private.HandleFunc("/api/v2/private/hash/send", v2.SendHashPrivateMode).Methods("POST")
 
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")
