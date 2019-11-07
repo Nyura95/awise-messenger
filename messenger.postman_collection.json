@@ -6,12 +6,20 @@
 	},
 	"item": [
 		{
-			"name": "auth",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
+			"name": "create new account",
 			"request": {
 				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth",
+			"request": {
+				"method": "POST",
 				"header": [
 					{
 						"key": "Content-Type",
@@ -22,15 +30,16 @@
 					{
 						"key": "Authorization",
 						"type": "text",
-						"value": "token1"
+						"value": "token1",
+						"disabled": true
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"email\": \"example@example.com\",\n\t\"language\": \"FR\",\n\t\"city\": 9,\n\t\"password\": \"azertyCityscoot543\"\n}"
+					"raw": "{\n\t\"username\": \"Test@test.fr\",\n\t\"password\": \"password\"\n}"
 				},
 				"url": {
-					"raw": "localhost:3000/api/v2/conversations/1",
+					"raw": "localhost:3000/api/v2/login",
 					"host": [
 						"localhost"
 					],
@@ -38,8 +47,7 @@
 					"path": [
 						"api",
 						"v2",
-						"conversations",
-						"1"
+						"login"
 					]
 				}
 			},

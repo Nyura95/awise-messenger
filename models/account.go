@@ -44,6 +44,23 @@ func FindAccount(id int) (*Account, error) {
 	return &account, nil
 }
 
+// FindAccountByPassword for find one account by password
+func FindAccountByPassword(password string) (*Account, error) {
+	account := Account{}
+	result, err := db.Query("SELECT id, avatars, firstname, lastname, username, password, id_scope, created_at, updated_at FROM tbl_account WHERE password = ?", password)
+	if err != nil {
+		return &account, err
+	}
+	defer result.Close()
+	for result.Next() {
+		err := result.Scan(&account.ID, &account.Avatars, &account.Firstname, &account.Lastname, &account.Username, &account.password, &account.IDScope, &account.CreatedAt, &account.UpdatedAt)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return &account, nil
+}
+
 // FindAllAccount for find all accounts in the database
 func FindAllAccount() ([]*Account, error) {
 	accounts := []*Account{}
