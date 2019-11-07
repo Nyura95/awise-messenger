@@ -3,6 +3,6 @@ multirooms ok
   - get multirooms ok
   - update multirooms ok 
 private mode
-authentification
+authentification ok
 emoji back
 message state
