@@ -49,6 +49,9 @@ func Start() {
 	// Multirooms
 	private.HandleFunc("/api/v2/conversations/multi", v2.StartConversationInMultiRoom).Methods("POST")
 
+	// private mode
+	private.HandleFunc("/api/v2/private/hash", v2.GetHashPrivateMode).Methods("POST")
+
 	// Ajax
 	r.HandleFunc("/", nil).Methods("OPTIONS")
 
