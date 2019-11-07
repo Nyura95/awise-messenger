@@ -3,7 +3,6 @@ package worker
 import (
 	"awise-messenger/models"
 	"awise-messenger/socket/info"
-	"log"
 )
 
 // CreateClientReturn return CreateClientReturn
@@ -25,7 +24,6 @@ func CreateClient(payload interface{}) interface{} {
 		return middleware
 	}
 
-	log.Println(token)
 	room, err := models.FindRoomByToken(token)
 	if err != nil || room.ID == 0 {
 		middleware.Msg = "Token not find"

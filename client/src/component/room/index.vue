@@ -175,10 +175,6 @@ export default {
         this.error = true;
       };
 
-      this.socket.private = token => {
-        console.log(token);
-      };
-
       this.socket.message = message => {
         this.message = "";
         this.messages.push(message);

@@ -180,6 +180,10 @@ export default {
         this.messages.push(message);
       };
 
+      this.socket.private = token => {
+        console.log(token);
+      };
+
       this.socket.update = message => {
         for (let i = 0; i < this.messages.length; i++) {
           if (message.id === this.messages[i].id) {
