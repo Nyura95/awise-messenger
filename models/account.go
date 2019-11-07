@@ -1,6 +1,7 @@
 package models
 
 import (
+	"awise-messenger/helpers"
 	"crypto/md5"
 	"encoding/hex"
 	"sync"
@@ -101,21 +102,31 @@ func (a *Account) Update() error {
 	return nil
 }
 
-// Create a new user
-func (a *Account) Create(password string) error {
-	stmt, err := db.Prepare("INSERT INTO tbl_account(avatars, firstname, lastname, username, password, id_scope, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
+// CreateAccount create a new user
+func CreateAccount(avatars string, firstname string, lastname string, username string, password string, idScope int) (*Account, error) {
+	account := &Account{}
+	stmt, err := db.Prepare("INSERT INTO tbl_account(avatars, firstname, lastname, username, password, id_scope, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return account, err
 	}
 	defer stmt.Close()
+
+	utc := helpers.GetUtc()
 
 	hasher := md5.New()
 	hasher.Write([]byte(password))
 
-	_, err = stmt.Exec(a.Avatars, a.Firstname, a.Lastname, a.Username, hex.EncodeToString(hasher.Sum(nil)), a.IDScope, time.UTC, time.UTC)
+	result, err := stmt.Exec(avatars, firstname, lastname, username, hex.EncodeToString(hasher.Sum(nil)), idScope, utc, utc)
 	if err != nil {
-		return err
+		return account, err
 	}
 
-	return nil
+	ID, err := result.LastInsertId()
+	if err != nil {
+		return account, err
+	}
+
+	account, _ = FindAccount(int(ID))
+
+	return account, nil
 }

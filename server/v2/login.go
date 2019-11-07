@@ -5,7 +5,8 @@ import (
 	"net/http"
 )
 
-// Login for log an user
+// Login authenticate an user
 func Login(w http.ResponseWriter, r *http.Request) {
+
 	json.NewEncoder(w).Encode("ok")
 }

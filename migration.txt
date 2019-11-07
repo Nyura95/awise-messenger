@@ -61,6 +61,7 @@ CREATE TABLE tbl_account (
 
 INSERT INTO tbl_account(avatars, firstname, lastname, username, password, id_scope, created_at, updated_at) VALUES('https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png', 'Alexis', 'Courapied', 'taxisoopya@hotmail.fr', '3a77ea8d1d2223b13e8928d8f41c7274', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 INSERT INTO tbl_account(avatars, firstname, lastname, username, password, id_scope, created_at, updated_at) VALUES('https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png', 'Valentin', 'Lafontaine', 'vlafont@gmail.com', '3b1220be8c0796039f8f6b0c4eb2467a', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+INSERT INTO tbl_account(avatars, firstname, lastname, username, password, id_scope, created_at, updated_at) VALUES('https://ssl.gstatic.com/images/branding/product/1x/avatar_circle_blue_512dp.png', 'Steeven', 'Courapied', 'steeven7@gmail.com', '3b1220be8c0796039f8f6b0c4eb2467a', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
 CREATE TABLE lbl_scope (
 	id int(11) NOT NULL AUTO_INCREMENT,

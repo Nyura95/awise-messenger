@@ -36,6 +36,7 @@ func Start() {
 
 	// Account
 	private.HandleFunc("/api/v2/accounts", v2.GetAccounts).Methods("GET")
+	public.HandleFunc("/api/v2/accounts", v2.CreateAccounts).Methods("POST")
 	// conversation
 	private.HandleFunc("/api/v2/conversations", v2.GetConversations).Methods("GET")
 	private.HandleFunc("/api/v2/conversations/{IDConversation}", v2.GetConversation).Methods("GET")
