@@ -126,6 +126,7 @@ AwiseSocket.prototype.send = function(message) {
  */
 AwiseSocket.prototype.close = function() {
   this._log('close');
+  console.log(this.webSocket);
   this.webSocket.close(1000, 'close user');
   this.webSocket = null;
 };
