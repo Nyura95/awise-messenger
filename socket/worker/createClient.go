@@ -3,6 +3,7 @@ package worker
 import (
 	"awise-messenger/models"
 	"awise-messenger/socket/info"
+	"log"
 )
 
 // CreateClientReturn return CreateClientReturn
@@ -29,6 +30,8 @@ func CreateClient(payload interface{}) interface{} {
 		middleware.Msg = "Token not find"
 		return middleware
 	}
+
+	log.Println(room)
 
 	if alive := info.Infos.Alive(room.IDAccount); alive == true {
 		middleware.Msg = "user already connected"

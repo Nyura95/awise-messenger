@@ -1,5 +1,5 @@
 export default {
-  getTokenConversation(state) {
-    return state.conversation.Token;
+  getHash: state => idconversation => {
+    return state.hashs[idconversation];
   },
 };

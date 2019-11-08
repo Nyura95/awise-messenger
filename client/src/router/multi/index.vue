@@ -2,31 +2,13 @@
   <Layout>
     <div class="row">
       <div class="col-4 mx-auto room">
-        <Room
-          name="Alexis"
-          token="AjfWc_6mhy5hCQRMSiE7nWPBc4Y="
-          tokenApi="token1"
-          :idconversation="16"
-          :id="1"
-        />
+        <Room name="Alexis" tokenApi="token1" :idconversation="16" :id="1" />
       </div>
       <div class="col-4 mx-auto room">
-        <Room
-          name="Valentin"
-          token="4JT3d2Izhz62hptDVMLkv0dXt5s="
-          tokenApi="token2"
-          :idconversation="16"
-          :id="2"
-        />
+        <Room name="Valentin" tokenApi="token2" :idconversation="16" :id="2" />
       </div>
       <div class="col-4 mx-auto room">
-        <Room
-          name="Steeven"
-          token="WoprbYZcYrlDqtsjky_H7WT5uwA="
-          tokenApi="token3"
-          :idconversation="16"
-          :id="3"
-        />
+        <Room name="Steeven" tokenApi="token3" :idconversation="16" :id="3" />
       </div>
     </div>
   </Layout>

@@ -1,7 +1,5 @@
-export const SET_CONVERSATION = 'SET_CONVERSATION';
-export const ADD_MESSAGE = 'ADD_MESSAGE';
+export const SET_HASH = 'SET_HASH';
 
 export default {
-  SET_CONVERSATION,
-  ADD_MESSAGE,
+  SET_HASH,
 };

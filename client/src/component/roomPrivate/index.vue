@@ -16,6 +16,13 @@
         v-bind:class="disconnectButtonClass"
         class="btn"
       />
+      <input
+        type="button"
+        v-bind:class="privateModeClass"
+        @click="startPrivate"
+        value="Private"
+        class="btn"
+      />
     </div>
     <div class="text-danger" v-if="error">Une erreur est survenu !</div>
 
@@ -52,11 +59,11 @@
 import { fetch } from "../../plugings/request";
 import AwiseSocket from "../../plugings/socket/index";
 export default {
-  name: "Room",
+  name: "RoomTarget",
   props: {
     id: Number,
     name: String,
-    idconversation: Number,
+    target: Number,
     tokenApi: String
   },
   mounted: function() {
@@ -83,6 +90,12 @@ export default {
         "btn-danger": !this.open,
         "btn-secondary": this.open
       };
+    },
+    privateModeClass: function() {
+      return {
+        "btn-danger": !this.privateMode,
+        "btn-success": this.privateMode
+      };
     }
   },
   data: function() {
@@ -94,7 +107,8 @@ export default {
       open: false,
       error: false,
       conversation: 0,
-      token: ""
+      token: "",
+      privateMode: false
     };
   },
   methods: {
@@ -142,6 +156,38 @@ export default {
         this.socket = null;
       }
     },
+    startPrivate() {
+      if (this.socket) {
+        if (this.privateMode) {
+          this.privateMode = false;
+          this.socket.publicMode();
+        } else {
+          let hash = this.$store.getters["conversation/getHash"](
+            this.conversation
+          );
+          if (!hash) {
+            fetch(
+              "/api/v2/private/hash",
+              "post",
+              { strength: 10 },
+              {
+                Authorization: this.tokenApi
+              }
+            ).then(result => {
+              fetch(
+                "/api/v2/private/hash/send",
+                "post",
+                { idconversation: this.conversation, token: hash },
+                {
+                  Authorization: this.tokenApi
+                }
+              );
+            });
+          }
+          this.socket.privateMode(hash);
+        }
+      }
+    },
     start() {
       this.error = false;
       if (this.socket) {
@@ -149,7 +195,7 @@ export default {
       }
 
       fetch(
-        "/api/v2/conversations/" + this.idconversation,
+        "/api/v2/conversations/target/" + this.target,
         "get",
         {},
         {
@@ -157,9 +203,13 @@ export default {
         }
       ).then(result => {
         this.messages = result.data.messages.reverse();
+
         this.conversation = result.data.id;
         this.token = result.data.token;
         console.log(result);
+        const hash = this.$store.getters["conversation/getHash"](
+          this.conversation
+        );
 
         this.socket = new AwiseSocket("ws://localhost:3001");
 
@@ -179,7 +229,12 @@ export default {
           this.messages.push(message);
         };
 
-        this.socket.private = token => {
+        this.socket.private = hash => {
+          this.$store.dispatch("conversation/setHash", {
+            idconversation: this.conversation,
+            hash
+          });
+          this.privateMode = true;
           for (let i = 0; i < this.messages.length; i++) {
             const decrypt = this.socket._decrypt(this.messages[i].message);
             if (decrypt !== "") {
@@ -229,6 +284,9 @@ export default {
 
         this.socket.initConversation(this.token, () => {
           this.open = true;
+          if (hash) {
+            this.socket.privateMode(hash);
+          }
         });
       });
     }

@@ -2,6 +2,7 @@ package worker
 
 import (
 	"awise-messenger/enum"
+	"awise-messenger/helpers"
 	"awise-messenger/models"
 	"awise-messenger/server/response"
 	"log"
@@ -18,7 +19,7 @@ type GetConversationPayload struct {
 func GetConversation(payload interface{}) interface{} {
 	context := payload.(GetConversationPayload)
 
-	rooms, _, err := models.FindAllRoomsByIDConversation(context.IDConversation)
+	rooms, targets, err := models.FindAllRoomsByIDConversation(context.IDConversation)
 	if err != nil {
 		log.Println("Error fetch rooms")
 		log.Println(err)
@@ -28,6 +29,11 @@ func GetConversation(payload interface{}) interface{} {
 	if len(rooms) == 0 {
 		log.Println("Error, rooms not find")
 		return response.BasicResponse(new(interface{}), "Error rooms not find", -1)
+	}
+
+	if exist := helpers.ArrayContainsInt(targets, context.IDUser); exist == false {
+		log.Println("Error, user is not from this conversation")
+		return response.BasicResponse(new(interface{}), "user is not from this conversation", -1)
 	}
 
 	conversation, err := models.FindConversation(context.IDConversation)

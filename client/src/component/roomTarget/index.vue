@@ -56,7 +56,6 @@ export default {
   props: {
     id: Number,
     name: String,
-    token: String,
     target: Number,
     tokenApi: String
   },
@@ -94,7 +93,8 @@ export default {
       accounts: {},
       open: false,
       error: false,
-      conversation: 0
+      conversation: 0,
+      token: ""
     };
   },
   methods: {
@@ -142,7 +142,12 @@ export default {
         this.socket = null;
       }
     },
-    chargeMessage() {
+    start() {
+      this.error = false;
+      if (this.socket) {
+        this.socket.close();
+      }
+
       fetch(
         "/api/v2/conversations/target/" + this.target,
         "get",
@@ -153,84 +158,77 @@ export default {
       ).then(result => {
         this.messages = result.data.messages.reverse();
         this.conversation = result.data.id;
+        this.token = result.data.token;
         console.log(result);
-      });
-    },
-    start() {
-      this.error = false;
-      if (this.socket) {
-        this.socket.close();
-      }
+        this.socket = new AwiseSocket("ws://localhost:3001");
 
-      this.socket = new AwiseSocket("ws://localhost:3001");
+        this.socket.onclose = () => {
+          this.messages = [];
+          this.open = false;
+        };
 
-      this.socket.onclose = () => {
-        this.messages = [];
-        this.open = false;
-      };
+        this.socket.onerror = err => {
+          console.log(err);
+          this.messages = [];
+          this.error = true;
+        };
 
-      this.socket.onerror = err => {
-        console.log(err);
-        this.messages = [];
-        this.error = true;
-      };
+        this.socket.message = message => {
+          this.message = "";
+          this.messages.push(message);
+        };
 
-      this.socket.message = message => {
-        this.message = "";
-        this.messages.push(message);
-      };
-
-      this.socket.private = token => {
-        for (let i = 0; i < this.messages.length; i++) {
-          const decrypt = this.socket._decrypt(this.messages[i].message);
-          if (decrypt !== "") {
-            this.messages[i].message = decrypt;
+        this.socket.private = token => {
+          for (let i = 0; i < this.messages.length; i++) {
+            const decrypt = this.socket._decrypt(this.messages[i].message);
+            if (decrypt !== "") {
+              this.messages[i].message = decrypt;
+            }
           }
-        }
-        this.messages = [...this.messages];
-      };
+          this.messages = [...this.messages];
+        };
 
-      this.socket.update = message => {
-        for (let i = 0; i < this.messages.length; i++) {
-          if (message.id === this.messages[i].id) {
-            this.messages[i] = message;
+        this.socket.update = message => {
+          for (let i = 0; i < this.messages.length; i++) {
+            if (message.id === this.messages[i].id) {
+              this.messages[i] = message;
+            }
           }
-        }
-        this.messages = [...this.messages];
-      };
+          this.messages = [...this.messages];
+        };
 
-      this.socket.delete = message => {
-        for (let i = 0; i < this.messages.length; i++) {
-          if (message.id === this.messages[i].id) {
-            this.messages.splice(i, 1);
+        this.socket.delete = message => {
+          for (let i = 0; i < this.messages.length; i++) {
+            if (message.id === this.messages[i].id) {
+              this.messages.splice(i, 1);
+            }
           }
-        }
-        this.messages = [...this.messages];
-      };
+          this.messages = [...this.messages];
+        };
 
-      this.socket.connection = user => {
-        new Notification("Nouvelle connexion", {
-          body: `l'utilisateur ${user} vient de se connecter`,
-          lang: "FR",
-          tag: new Date()
+        this.socket.connection = user => {
+          new Notification("Nouvelle connexion", {
+            body: `l'utilisateur ${user} vient de se connecter`,
+            lang: "FR",
+            tag: new Date()
+          });
+        };
+
+        this.socket.disconnection = user => {
+          new Notification("Déconnection", {
+            body: `l'utilisateur ${user} vient de se déconnecter`,
+            lang: "FR",
+            tag: new Date()
+          });
+        };
+
+        this.socket.error = (lockey, message) => {
+          this.error = true;
+        };
+
+        this.socket.initConversation(this.token, () => {
+          this.open = true;
         });
-      };
-
-      this.socket.disconnection = user => {
-        new Notification("Déconnection", {
-          body: `l'utilisateur ${user} vient de se déconnecter`,
-          lang: "FR",
-          tag: new Date()
-        });
-      };
-
-      this.socket.error = (lockey, message) => {
-        this.error = true;
-      };
-
-      this.socket.initConversation(this.token, () => {
-        this.chargeMessage();
-        this.open = true;
       });
     }
   }

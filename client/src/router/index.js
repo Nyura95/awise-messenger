@@ -2,8 +2,8 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import Home from './home';
-import Charge from './charge';
 import Multi from './multi';
+import Private from './private';
 import VueChatScroll from 'vue-chat-scroll';
 Vue.use(VueChatScroll);
 
@@ -13,8 +13,8 @@ export const router = new VueRouter({
   mode: 'history',
   routes: [
     { path: '/', name: 'home', component: Home, meta: { requiresAuth: true } },
-    { path: '/charge', name: 'charge', component: Charge, meta: { requiresAuth: true } },
     { path: '/multi', name: 'multi', component: Multi, meta: { requiresAuth: true } },
+    { path: '/private', name: 'private', component: Private, meta: { requiresAuth: true } },
   ],
 });
 
